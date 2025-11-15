@@ -1,0 +1,55 @@
+export interface Feedback {
+  id: number;
+  author: string;
+  avatar: string;
+  rating: number; // 1 to 5
+  comment: string;
+  date: string;
+}
+
+export interface Agency {
+  id: number;
+  name: string;
+  isVerified: boolean;
+  verificationReason?: string;
+  description: string;
+  certifications?: string[];
+}
+
+export interface Program {
+  id: number;
+  name: string;
+  agency: Agency;
+  destinationCity: string;
+  destinationCountry: string;
+  price: number;
+  shortDescription: string;
+  longDescription: string;
+  includes: string[];
+  feedbacks: Feedback[];
+  image: string;
+  verifications?: string[];
+}
+
+export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';
+
+export interface CitySafetyData {
+  id: number;
+  cityName: string;
+  countryName: string;
+  safetyStatus: SafetyStatus;
+  positiveFeedbackPercentage: number;
+  totalFeedbacks: number;
+  coords: { lat: number; lng: number }; // For map positioning
+  radius: number; // in meters
+}
+
+export interface Course {
+  id: number;
+  title: string;
+  description: string;
+  instructor: string;
+  partner: string;
+}
+
+export type Page = 'home' | 'programs' | 'programDetail' | 'map' | 'hub' | 'agencyDetail' | 'contentPage';
