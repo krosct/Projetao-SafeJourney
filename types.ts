@@ -50,6 +50,9 @@ export interface Course {
   description: string;
   instructor: string;
   partner: string;
+  price: number;
+  programId: number;
+  type: 'Curso' | 'Mentoria';
 }
 
-export type Page = 'home' | 'programs' | 'programDetail' | 'map' | 'hub' | 'agencyDetail' | 'contentPage';
+export type Page = 'home' | 'programs' | 'programDetail' | 'map' | 'hub' | 'agencyDetail' | 'contentPage' | 'courseDetail';

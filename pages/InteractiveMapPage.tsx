@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import type { Map, Circle } from 'leaflet';
 import { CitySafetyData, Program } from '../types';
 import { programs as allPrograms } from '../data/mockData';
-
-// We assume Leaflet is loaded globally from index.html
-declare var L: any;
 
 interface InteractiveMapPageProps {
   cities: CitySafetyData[];
@@ -12,79 +11,85 @@ interface InteractiveMapPageProps {
 }
 
 const statusStyles = {
-    Green: { color: '#5f9ea0', fillColor: '#66cdaa', bgClass: 'bg-[#66cdaa]/20', textClass: 'text-[#66cdaa]', borderClass: 'border-[#66cdaa]', name: 'Seguro' },
-    Yellow: { color: '#b8860b', fillColor: '#daa520', bgClass: 'bg-[#daa520]/20', textClass: 'text-[#daa520]', borderClass: 'border-[#daa520]', name: 'Atenção' },
-    Red: { color: '#c53030', fillColor: '#f56565', bgClass: 'bg-red-400/20', textClass: 'text-red-400', borderClass: 'border-red-500', name: 'Alto Risco' },
-    Neutral: { color: '#718096', fillColor: '#a0aec0', bgClass: 'bg-gray-500/20', textClass: 'text-gray-300', borderClass: 'border-gray-400', name: 'Dados Insuficientes' },
+    Green: { color: '#5f9ea0', fillColor: '#66cdaa', bgClass: 'bg-[#66cdaa]/20', textClass: 'text-[#5f9ea0]', borderClass: 'border-[#66cdaa]', name: 'Seguro' },
+    Yellow: { color: '#b8860b', fillColor: '#daa520', bgClass: 'bg-[#daa520]/20', textClass: 'text-[#b8860b]', borderClass: 'border-[#daa520]', name: 'Atenção' },
+    Red: { color: '#c53030', fillColor: '#f56565', bgClass: 'bg-red-400/20', textClass: 'text-red-500', borderClass: 'border-red-500', name: 'Alto Risco' },
+    Neutral: { color: '#718096', fillColor: '#a0aec0', bgClass: 'bg-gray-500/20', textClass: 'text-gray-500', borderClass: 'border-gray-400', name: 'Dados Insuficientes' },
 };
 
 export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({ cities, onProgramSelect }) => {
   const [selectedCity, setSelectedCity] = useState<CitySafetyData | null>(cities[0] || null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any | null>(null); // Use 'any' for L.Map to avoid type conflicts with global L
-  const layerRef = useRef<any | null>(null); // Use 'any' for L.FeatureGroup
+  const mapInstanceRef = useRef<Map | null>(null);
+  const circlesRef = useRef<Record<number, Circle>>({});
 
+  // Initialize map
   useEffect(() => {
-    if (mapContainerRef.current && !mapRef.current && typeof L !== 'undefined') {
-      mapRef.current = L.map(mapContainerRef.current, {
-        center: [30, 10], // Centered broadly to show Europe, NA, and Asia
+    if (mapContainerRef.current && !mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [30, 10],
         zoom: 2,
         minZoom: 2,
-        maxBounds: [ [-85, -180], [85, 180] ], // prevent scrolling off map
+        maxBounds: [[-85, -180], [85, 180]],
         maxBoundsViscosity: 1.0,
         worldCopyJump: true,
       });
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd',
-	    maxZoom: 20
-      }).addTo(mapRef.current);
-      
-      layerRef.current = L.featureGroup().addTo(mapRef.current);
+        maxZoom: 20,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
     }
-    
-    // Cleanup map on component unmount
+
     return () => {
-        if (mapRef.current) {
-            mapRef.current.remove();
-            mapRef.current = null;
-        }
-    }
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
   }, []);
 
+  // Update circles when cities data changes
   useEffect(() => {
-    if(layerRef.current) {
-        // Clear previous circles
-        layerRef.current.clearLayers();
+    const map = mapInstanceRef.current;
+    if (!map) return;
 
-        cities.forEach(city => {
-            const style = statusStyles[city.safetyStatus];
-            const circle = L.circle([city.coords.lat, city.coords.lng], {
-                color: style.color,
-                fillColor: style.fillColor,
-                fillOpacity: 0.6,
-                radius: city.radius,
-                weight: 1,
-            }).addTo(layerRef.current!);
-            
-            circle.bindTooltip(city.cityName, {
-                permanent: false,
-                direction: 'top'
-            });
+    // Clear previous circles
+    Object.values(circlesRef.current).forEach(circle => circle.remove());
+    const newCircles: Record<number, Circle> = {};
 
-            circle.on('click', () => {
-                setSelectedCity(city);
-                if(mapRef.current) {
-                    mapRef.current.flyTo([city.coords.lat, city.coords.lng], 6, {
-                        animate: true,
-                        duration: 1
-                    });
-                }
-            });
-        });
-    }
+    cities.forEach(city => {
+      const style = statusStyles[city.safetyStatus];
+      const circle = L.circle([city.coords.lat, city.coords.lng], {
+        radius: city.radius,
+        color: style.color,
+        fillColor: style.fillColor,
+        fillOpacity: 0.6,
+        weight: 1,
+      }).addTo(map);
+
+      circle.bindTooltip(city.cityName, { direction: 'top' });
+      circle.on('click', () => {
+        setSelectedCity(city);
+      });
+      newCircles[city.id] = circle;
+    });
+    circlesRef.current = newCircles;
   }, [cities]);
 
+  // Fly to selected city
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (map && selectedCity) {
+      map.flyTo([selectedCity.coords.lat, selectedCity.coords.lng], 6, {
+        animate: true,
+        duration: 1.5
+      });
+    }
+  }, [selectedCity]);
   
   const cityPrograms = selectedCity ? allPrograms.filter(p => p.destinationCity === selectedCity.cityName) : [];
   const currentStyle = selectedCity ? statusStyles[selectedCity.safetyStatus] : null;
@@ -93,14 +98,14 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({ cities, 
     <div className="bg-gray-100">
        <div className="bg-white border-b border-gray-200 p-3 text-center">
           <p className="text-sm text-gray-700 container mx-auto">
-              O mapa de segurança é baseado em feedbacks agregados e anônimos de usuárias. Todas as informações passam por um processo de verificação antes de serem publicadas.
+              O mapa de avaliações é baseado em feedbacks agregados e anônimos de usuárias. Todas as informações passam por um processo de verificação antes de serem publicadas.
           </p>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-8">
             {/* Map Area */}
-            <div className="w-full md:flex-grow h-[600px] rounded-lg overflow-hidden shadow-lg" ref={mapContainerRef} id="map">
-                {/* The map will be rendered here by Leaflet */}
+            <div className="w-full md:flex-grow h-[600px] rounded-lg overflow-hidden shadow-lg">
+                <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} className="leaflet-container" />
             </div>
 
             {/* Sidebar */}

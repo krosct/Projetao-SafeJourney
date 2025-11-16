@@ -12,7 +12,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage }) => {
   const navItems: { page: NavigablePage, label: string }[] = [
     { page: 'home', label: 'Início' },
     { page: 'programs', label: 'Programas' },
-    { page: 'map', label: 'Mapa de Segurança' },
+    { page: 'map', label: 'Mapa de Avaliações' },
     { page: 'hub', label: 'Hub de Conhecimento' },
   ];
 
@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage }) => {
   const activeClasses = "text-[#66CDAA]";
 
   return (
-    <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-[1000]">
+    <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-[2000]">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0 cursor-pointer" onClick={() => onNavigate('home')}>

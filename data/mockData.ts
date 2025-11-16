@@ -205,33 +205,32 @@ export const citySafetyData: CitySafetyData[] = uniqueCities.map((cityInfo, i) =
 });
 
 // --- KNOWLEDGE HUB COURSES ---
-export const courses: Course[] = [
-  {
-    id: 1,
-    title: "Segurança Essencial para Viajantes Solo",
-    description: "Um curso abrangente cobrindo consciência situacional, costumes locais e comportamentos defensivos para mulheres que viajam sozinhas.",
-    instructor: "Maria Reis",
-    partner: "Equipe SafeJourney"
-  },
-  {
-    id: 2,
-    title: "Etiqueta Cultural no Leste Asiático",
-    description: "Navegue pelo Japão, Coreia do Sul e China com confiança. Aprenda sobre normas sociais, estilos de comunicação e respeito às tradições locais.",
-    instructor: "Dra. Aiko Tanaka",
-    partner: "Global Connect Institute"
-  },
-  {
-    id: 3,
-    title: "Planejamento Financeiro para seu Intercâmbio",
-    description: "Aprenda a fazer um orçamento eficaz, gerenciar moedas estrangeiras e evitar armadilhas financeiras comuns ao estudar no exterior.",
-    instructor: "Chloe Davis",
-    partner: "Smart Money Abroad"
-  },
-  {
-    id: 4,
-    title: "Conexão Mentoria: Seu Primeiro Mês",
-    description: "Um programa de mentoria gratuito que conecta você a uma ex-intercambista que pode guiá-la através dos desafios dos primeiros 30 dias.",
-    instructor: "Várias Mentoras",
-    partner: "Alumni SafeJourney"
-  }
-];
+const coursePartners = ["Equipe SafeJourney", "Global Connect Institute", "Smart Money Abroad", "Alumni SafeJourney", "Career Builders", "Cultural Insights Co."];
+const courseInstructors = ["Maria Reis", "Dra. Aiko Tanaka", "Chloe Davis", "Ana Pereira", "Juliana Costa", "Renata Alves", "Beatriz Lima", "Carla Martins"];
+
+export const courses: Course[] = programs.flatMap((program, index) => {
+    
+    const course: Course = {
+        id: (index * 2) + 1,
+        type: 'Curso',
+        title: `Curso de Imersão Cultural para ${program.destinationCity}`,
+        description: `Prepare-se para sua experiência em ${program.destinationCity}. Este curso aborda costumes locais, dicas de segurança e frases essenciais para uma adaptação tranquila e enriquecedora.`,
+        instructor: getRandom(courseInstructors),
+        partner: getRandom(coursePartners),
+        price: Math.round(program.price * 0.1),
+        programId: program.id,
+    };
+
+    const mentorship: Course = {
+        id: (index * 2) + 2,
+        type: 'Mentoria',
+        title: `Mentoria de Carreira em ${program.destinationCity}`,
+        description: `Conecte-se com uma mentora que já viveu a experiência de intercâmbio em ${program.destinationCity} e receba conselhos práticos para alavancar sua carreira durante e após o programa.`,
+        instructor: getRandom(courseInstructors),
+        partner: "Alumni SafeJourney",
+        price: Math.round(program.price * 0.1),
+        programId: program.id,
+    };
+
+    return [course, mentorship];
+});

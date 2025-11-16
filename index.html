@@ -20,6 +20,7 @@
       .leaflet-container {
         height: 100%;
         width: 100%;
+        background-color: #f0f0f0; /* Add a background color for loading state */
       }
       /* Custom scrollbar hiding utility */
       .hide-scrollbar::-webkit-scrollbar {
@@ -40,20 +41,28 @@
       .animate-marquee:hover {
         animation-play-state: paused;
       }
+      /* Ensure leaflet zoom controls are above sidebar on map page */
+      .leaflet-control-zoom {
+        z-index: 100;
+      }
+      /* Move leaflet controls down to avoid overlapping the sticky header
+      .leaflet-top.leaflet-left {
+        top: 90px;
+      } */
     </style>
   <script type="importmap">
 {
   "imports": {
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "leaflet": "https://esm.sh/leaflet@1.9.4"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
-    <!-- Leaflet JS (after root div) -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet JS is now loaded via importmap -->
   </body>
 </html>

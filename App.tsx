@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Page, Program, Agency } from './types';
+import { Page, Program, Agency, Course } from './types';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -12,6 +12,7 @@ import { citySafetyData, courses, programs, agencies } from './data/mockData';
 import { CheckmarkIcon } from './components/icons/CheckmarkIcon';
 import { ProgramCard } from './components/ProgramCard';
 import { ContentPage } from './pages/ContentPage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
 
 
 const AgencyDetailPage: React.FC<{
@@ -70,6 +71,7 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isReportModalOpen, setReportModalOpen] = useState(false);
   const [initialQuery, setInitialQuery] = useState('');
   const [contentPageData, setContentPageData] = useState<ContentPageData | null>(null);
@@ -94,6 +96,11 @@ const App: React.FC = () => {
   const handleProgramSelect = (program: Program) => {
     setSelectedProgram(program);
     navigate('programDetail');
+  };
+  
+  const handleCourseSelect = (course: Course) => {
+    setSelectedCourse(course);
+    navigate('courseDetail');
   };
 
   const handleAgencySelect = (agency: Agency) => {
@@ -153,7 +160,19 @@ const App: React.FC = () => {
       case 'map':
         return <InteractiveMapPage cities={citySafetyData} onProgramSelect={handleProgramSelect} />;
       case 'hub':
-        return <KnowledgeHubPage courses={courses} />;
+        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} />;
+       case 'courseDetail':
+        if (selectedCourse) {
+            const relatedProgram = programs.find(p => p.id === selectedCourse.programId);
+            if (relatedProgram) {
+                return <CourseDetailPage 
+                    course={selectedCourse} 
+                    relatedProgram={relatedProgram} 
+                    onBack={handleBack} 
+                />;
+            }
+        }
+        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} />;
       case 'contentPage':
         if (contentPageData) {
             return <ContentPage title={contentPageData.title} body={contentPageData.body} onBack={handleBack} />;
