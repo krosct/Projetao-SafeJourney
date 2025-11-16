@@ -1,6 +1,7 @@
 import React from 'react';
 import { Course, Program } from '../types';
 import { CheckmarkIcon } from '../components/icons/CheckmarkIcon';
+import { TagIcon } from '../components/icons/TagIcon';
 
 interface CourseDetailPageProps {
   course: Course;
@@ -37,6 +38,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, rela
   const agency = relatedProgram.agency;
   const photoSeeds = generatePhotoSeeds(course, relatedProgram);
 
+  const hasDiscount = course.discountPercentage && course.discountPercentage > 0;
+  const finalPrice = hasDiscount ? Math.round(course.price * (1 - course.discountPercentage! / 100)) : course.price;
+
+
   return (
     <div className="bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -56,10 +61,24 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, rela
                 <p className="text-gray-500">Parceiro: {course.partner}</p>
             </div>
             
-            <div className="mt-8 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg">
-                <h3 className="text-lg font-semibold text-emerald-800">Oferta Especial: 100% de Desconto!</h3>
-                <p className="mt-2 text-emerald-700">
-                    Este {course.type.toLowerCase()} tem 100% de desconto ao contratar o programa de intercâmbio "<span className="font-semibold">{relatedProgram.name}</span>".
+            <div className="mt-8 border-t pt-6">
+                {hasDiscount ? (
+                    <div className="flex items-center gap-4">
+                         <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-medium text-gray-500 line-through">${course.price}</span>
+                            <span className="text-5xl font-extrabold text-gray-900">${finalPrice}</span>
+                        </div>
+                        <span className="px-3 py-1 text-lg font-semibold text-red-700 bg-red-100 rounded-full">
+                            {course.discountPercentage}% OFF
+                        </span>
+                    </div>
+                ) : (
+                    <span className="text-5xl font-extrabold text-gray-900">${course.price}</span>
+                )}
+                <p className="mt-2 text-gray-600">
+                    {hasDiscount && course.discountPercentage === 100
+                        ? `Este ${course.type.toLowerCase()} é seu ao contratar o programa de intercâmbio relacionado!`
+                        : `Aproveite este desconto especial por tempo limitado.`}
                 </p>
             </div>
           </div>

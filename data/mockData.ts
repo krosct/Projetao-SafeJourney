@@ -208,6 +208,17 @@ export const citySafetyData: CitySafetyData[] = uniqueCities.map((cityInfo, i) =
 const coursePartners = ["Equipe SafeJourney", "Global Connect Institute", "Smart Money Abroad", "Alumni SafeJourney", "Career Builders", "Cultural Insights Co."];
 const courseInstructors = ["Maria Reis", "Dra. Aiko Tanaka", "Chloe Davis", "Ana Pereira", "Juliana Costa", "Renata Alves", "Beatriz Lima", "Carla Martins"];
 
+const discounts = [30, 35, 40, 45, 50];
+const getRandomDiscount = () => discounts[Math.floor(Math.random() * discounts.length)];
+
+const getDiscount = () => {
+    if (Math.random() < 0.5) {
+        return 100;
+    }
+    return getRandomDiscount();
+};
+
+
 export const courses: Course[] = programs.flatMap((program, index) => {
     
     const course: Course = {
@@ -219,6 +230,7 @@ export const courses: Course[] = programs.flatMap((program, index) => {
         partner: getRandom(coursePartners),
         price: Math.round(program.price * 0.1),
         programId: program.id,
+        discountPercentage: getDiscount(),
     };
 
     const mentorship: Course = {
@@ -230,6 +242,7 @@ export const courses: Course[] = programs.flatMap((program, index) => {
         partner: "Alumni SafeJourney",
         price: Math.round(program.price * 0.1),
         programId: program.id,
+        discountPercentage: getDiscount(),
     };
 
     return [course, mentorship];

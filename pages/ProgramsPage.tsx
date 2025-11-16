@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { Program, Agency } from '../types';
 import { ProgramCard } from '../components/ProgramCard';
 import { CERTIFICATIONS, VERIFICATIONS } from '../data/mockData';
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
+import { ArrowUpIcon } from '../components/icons/ArrowUpIcon';
 
 interface ProgramsPageProps {
   allPrograms: Program[];
@@ -19,6 +21,24 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
   const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
   const [selectedVerifications, setSelectedVerifications] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const checkScrollTop = () => {
+      if (!showScrollTop && window.pageYOffset > 400) {
+        setShowScrollTop(true);
+      } else if (showScrollTop && window.pageYOffset <= 400) {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', checkScrollTop);
+    return () => window.removeEventListener('scroll', checkScrollTop);
+  }, [showScrollTop]);
+
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const uniqueDestinations = useMemo(() => {
     const destinations = new Set<string>();
@@ -67,7 +87,7 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <button onClick={onBack} className="mb-8 text-[#66CDAA] hover:text-[#5F9EA0] font-semibold">&larr; Voltar</button>
         
-        <div className="bg-white p-6 rounded-lg shadow-md mb-10 sticky top-24 z-30">
+        <div className="bg-white p-6 rounded-lg shadow-md mb-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
              <input
               type="text"
@@ -170,6 +190,15 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
           </div>
         )}
       </div>
+      {showScrollTop && (
+        <button
+          onClick={scrollTop}
+          className="fixed bottom-8 right-8 bg-[#66CDAA] text-white p-3 rounded-full shadow-lg hover:bg-[#5F9EA0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#66CDAA] transition-opacity duration-300 z-50"
+          aria-label="Ir para o topo"
+        >
+          <ArrowUpIcon className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 };

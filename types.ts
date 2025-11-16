@@ -53,6 +53,7 @@ export interface Course {
   price: number;
   programId: number;
   type: 'Curso' | 'Mentoria';
+  discountPercentage?: number;
 }
 
 export type Page = 'home' | 'programs' | 'programDetail' | 'map' | 'hub' | 'agencyDetail' | 'contentPage' | 'courseDetail';
