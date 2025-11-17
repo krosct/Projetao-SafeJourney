@@ -61,43 +61,56 @@ export const KnowledgeHubPage: React.FC<KnowledgeHubPageProps> = ({ courses, pro
 
     return (
         <div className="bg-gray-50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-extrabold text-gray-900">Hub de Conhecimento</h1>
-                    <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-                        Cursos e mentorias para empoderar sua jornada. Desenvolvido pela equipe SafeJourney e nossos parceiros.
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-md mb-10">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            placeholder="Buscar por nome, descrição..."
-                            className="w-full px-4 py-3 text-base text-gray-900 placeholder-gray-500 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
-                        />
-                        <select
-                            value={selectedType}
-                            onChange={e => setSelectedType(e.target.value)}
-                            className="w-full px-4 py-3 text-base text-gray-900 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
-                        >
-                            <option value="">Todos os Tipos</option>
-                            <option value="Curso">Curso</option>
-                            <option value="Mentoria">Mentoria</option>
-                        </select>
-                        <select
-                            value={selectedPartner}
-                            onChange={e => setSelectedPartner(e.target.value)}
-                            className="w-full px-4 py-3 text-base text-gray-900 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
-                        >
-                            <option value="">Todos os Parceiros</option>
-                            {uniquePartners.map(partner => <option key={partner} value={partner}>{partner}</option>)}
-                        </select>
+            <div className="relative bg-white overflow-hidden">
+                <div className="relative flex flex-col justify-center items-center py-20 md:pt-52 pb-12 px-4 sm:px-6 lg:px-8">
+                    <img 
+                        // src="https://img.freepik.com/fotos-gratis/foto-vertical-de-uma-mulher-asiatica-feliz-relaxando-ao-ar-livre-no-parque-lendo-seu-livro-e-sentada-debaixo-da-arvore_1258-123796.jpg?semt=ais_hybrid&w=740&q=80"
+                        src="https://s2.glbimg.com/g18hv5FkXbv8BdUJ9WCD9kjkZIM=/smart/e.glbimg.com/og/ed/f/original/2022/03/08/alexandra-fuller-wkgv7i2vtzm-unsplash.jpg"
+                        alt="Mulher lendo um livro em um parque, simbolizando conhecimento e preparação."
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 md:object-[center_75%]"
+                        aria-hidden="true"
+                    />
+                    <div className="relative container mx-auto text-center">
+                        <h1 className="text-4xl font-extrabold text-gray-900">Hub de Conhecimento</h1>
+                        <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+                            Cursos e mentorias para empoderar sua jornada. Desenvolvido pela equipe SafeJourney e nossos parceiros.
+                        </p>
+                    </div>
+                    
+                    <div className="relative container mx-auto mt-24 w-full max-w-5xl">
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Buscar por nome, descrição..."
+                                    className="w-full px-4 py-3 text-base text-gray-900 placeholder-gray-500 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
+                                />
+                                <select
+                                    value={selectedType}
+                                    onChange={e => setSelectedType(e.target.value)}
+                                    className="w-full px-4 py-3 text-base text-gray-900 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
+                                >
+                                    <option value="">Todos os Tipos</option>
+                                    <option value="Curso">Curso</option>
+                                    <option value="Mentoria">Mentoria</option>
+                                </select>
+                                <select
+                                    value={selectedPartner}
+                                    onChange={e => setSelectedPartner(e.target.value)}
+                                    className="w-full px-4 py-3 text-base text-gray-900 bg-gray-100 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#66CDAA] focus:border-[#66CDAA]"
+                                >
+                                    <option value="">Todos os Parceiros</option>
+                                    {uniquePartners.map(partner => <option key={partner} value={partner}>{partner}</option>)}
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 {filteredCourses.length > 0 ? (
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                         {filteredCourses.map(course => {
