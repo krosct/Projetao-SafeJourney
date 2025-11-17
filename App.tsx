@@ -14,6 +14,7 @@ import { ProgramCard } from './components/ProgramCard';
 import { ContentPage } from './pages/ContentPage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { LoginPage } from './pages/LoginPage';
+import { InfoRequestModal } from './components/InfoRequestModal';
 
 
 const AgencyDetailPage: React.FC<{
@@ -80,6 +81,9 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<Page[]>(['home']);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  const [isInfoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoRequestProgram, setInfoRequestProgram] = useState<Program | null>(null);
+
   const navigate = useCallback((page: Page) => {
     setHistory(prev => (prev[prev.length - 1] !== page ? [...prev, page] : prev));
     setCurrentPage(page);
@@ -145,6 +149,11 @@ const App: React.FC = () => {
     navigate('programs');
   };
 
+  const handleInfoRequest = (program: Program) => {
+    setInfoRequestProgram(program);
+    setInfoModalOpen(true);
+  };
+
   const getActivePageForHeader = (): 'home' | 'programs' | 'map' | 'hub' => {
     const lastNavPage = [...history].reverse().find(p => ['home', 'programs', 'map', 'hub'].includes(p));
     return (lastNavPage as 'home' | 'programs' | 'map' | 'hub') || 'home';
@@ -168,6 +177,7 @@ const App: React.FC = () => {
             program={selectedProgram} 
             onBack={handleBack} 
             onReport={() => setReportModalOpen(true)} 
+            onInfoRequest={handleInfoRequest}
           />;
         }
         return <HomePage onProgramSelect={handleProgramSelect} onNavigate={handleNavigate} onSearch={handleSearch}/>;
@@ -228,6 +238,14 @@ const App: React.FC = () => {
           isOpen={isReportModalOpen} 
           onClose={() => setReportModalOpen(false)} 
           program={selectedProgram}
+        />
+      )}
+      {infoRequestProgram && (
+        <InfoRequestModal 
+          isOpen={isInfoModalOpen} 
+          onClose={() => setInfoModalOpen(false)} 
+          program={infoRequestProgram}
+          currentUser={currentUser}
         />
       )}
     </div>

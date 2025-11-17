@@ -11,6 +11,7 @@ interface ProgramDetailPageProps {
   program: Program;
   onBack: () => void;
   onReport: () => void;
+  onInfoRequest: (program: Program) => void;
 }
 
 const RatingStars: React.FC<{ rating: number }> = ({ rating }) => (
@@ -21,7 +22,7 @@ const RatingStars: React.FC<{ rating: number }> = ({ rating }) => (
   </div>
 );
 
-export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, onReport }) => {
+export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, onReport, onInfoRequest }) => {
   const avgRating = program.feedbacks.reduce((acc, curr) => acc + curr.rating, 0) / program.feedbacks.length;
 
   return (
@@ -71,7 +72,9 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, o
                   ))}
                 </ul>
               </div>
-              <button className="mt-8 w-full bg-[#66CDAA] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#5F9EA0] transition-transform transform hover:scale-105">
+              <button 
+                onClick={() => onInfoRequest(program)}
+                className="mt-8 w-full bg-[#66CDAA] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#5F9EA0] transition-transform transform hover:scale-105">
                 Solicitar Informações
               </button>
             </div>
