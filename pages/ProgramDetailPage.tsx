@@ -31,14 +31,18 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, o
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-x-12">
           {/* Left Column - Image and Core Info */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 relative z-10">
             <img src={program.image} alt={program.name} className="w-full h-96 object-cover rounded-lg shadow-lg mb-6" />
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-center mb-4">
                 <div>
                     <h1 className="text-4xl font-extrabold text-gray-900">{program.name}</h1>
                     <p className="mt-2 text-xl text-gray-600">Oferecido por <span className="font-bold">{program.agency.name}</span></p>
                 </div>
-                {program.agency.isVerified && <VerifiedSeal />}
+                {program.agency.isVerified && 
+                  <div className="flex-shrink-0 ml-4">
+                    <VerifiedSeal />
+                  </div>
+                }
             </div>
             <p className="text-lg text-gray-700 mt-4">{program.longDescription}</p>
 

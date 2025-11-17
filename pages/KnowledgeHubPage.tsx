@@ -7,9 +7,10 @@ interface KnowledgeHubPageProps {
     courses: Course[];
     programs: Program[];
     onCourseSelect: (course: Course) => void;
+    onProgramSelect: (program: Program) => void;
 }
 
-export const KnowledgeHubPage: React.FC<KnowledgeHubPageProps> = ({ courses, programs, onCourseSelect }) => {
+export const KnowledgeHubPage: React.FC<KnowledgeHubPageProps> = ({ courses, programs, onCourseSelect, onProgramSelect }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedType, setSelectedType] = useState('');
     const [selectedPartner, setSelectedPartner] = useState('');
@@ -107,6 +108,7 @@ export const KnowledgeHubPage: React.FC<KnowledgeHubPageProps> = ({ courses, pro
                                     course={course} 
                                     program={relatedProgram}
                                     onSelect={onCourseSelect} 
+                                    onProgramLinkSelect={onProgramSelect}
                                 />
                             );
                         })}

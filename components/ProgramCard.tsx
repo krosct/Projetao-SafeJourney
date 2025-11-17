@@ -13,11 +13,11 @@ interface ProgramCardProps {
 
 export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onSelect }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col" onClick={() => onSelect(program)}>
+    <div className="bg-white rounded-xl shadow-md transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col" onClick={() => onSelect(program)}>
       <div className="relative">
-        <img className="h-48 w-full object-cover" src={program.image} alt={program.name} />
+        <img className="h-48 w-full object-cover rounded-t-xl" src={program.image} alt={program.name} />
         {program.agency.isVerified && (
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 z-10">
             <VerifiedSeal />
           </div>
         )}

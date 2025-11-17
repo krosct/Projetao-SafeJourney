@@ -173,7 +173,7 @@ const App: React.FC = () => {
       case 'map':
         return <InteractiveMapPage cities={citySafetyData} onProgramSelect={handleProgramSelect} />;
       case 'hub':
-        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} />;
+        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} onProgramSelect={handleProgramSelect} />;
        case 'courseDetail':
         if (selectedCourse) {
             const relatedProgram = programs.find(p => p.id === selectedCourse.programId);
@@ -186,7 +186,7 @@ const App: React.FC = () => {
                 />;
             }
         }
-        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} />;
+        return <KnowledgeHubPage courses={courses} programs={programs} onCourseSelect={handleCourseSelect} onProgramSelect={handleProgramSelect} />;
       case 'contentPage':
         if (contentPageData) {
             return <ContentPage title={contentPageData.title} body={contentPageData.body} onBack={handleBack} />;

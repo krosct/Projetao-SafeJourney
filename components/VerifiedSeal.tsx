@@ -1,11 +1,19 @@
 import React from 'react';
-import { CheckmarkIcon } from './icons/CheckmarkIcon';
+import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
 
 export const VerifiedSeal: React.FC = () => {
   return (
-    <div className="inline-flex items-center bg-[#66CDAA]/30 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-      <CheckmarkIcon className="w-4 h-4 mr-1.5" />
-      Verificado pela SafeJourney
+    <div 
+      className="relative group flex items-center justify-center bg-[#5F9EA0]/40 backdrop-blur-sm text-[#DAA520] w-9 h-9 rounded-full shadow-md"
+    >
+      <ShieldCheckIcon className="w-5 h-5" />
+      <div 
+        className="absolute bottom-full mb-2 w-max px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50"
+        role="tooltip"
+      >
+        Verificado pela SafeJourney
+        <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+      </div>
     </div>
   );
 };

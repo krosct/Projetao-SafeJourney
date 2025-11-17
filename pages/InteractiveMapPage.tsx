@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import type { Map, Circle } from 'leaflet';
 import { CitySafetyData, Program } from '../types';
 import { programs as allPrograms } from '../data/mockData';
 
@@ -20,8 +19,9 @@ const statusStyles = {
 export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({ cities, onProgramSelect }) => {
   const [selectedCity, setSelectedCity] = useState<CitySafetyData | null>(cities[0] || null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<Map | null>(null);
-  const circlesRef = useRef<Record<number, Circle>>({});
+  // FIX: Use L.Map and L.Circle for type safety with leaflet instance
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const circlesRef = useRef<Record<number, L.Circle>>({});
 
   // Initialize map
   useEffect(() => {
@@ -58,8 +58,10 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({ cities, 
     if (!map) return;
 
     // Clear previous circles
-    Object.values(circlesRef.current).forEach(circle => circle.remove());
-    const newCircles: Record<number, Circle> = {};
+    // FIX: Explicitly cast to L.Circle[] to address incorrect type inference for 'circle'.
+    (Object.values(circlesRef.current) as L.Circle[]).forEach(circle => circle.remove());
+    // FIX: Use L.Circle for type safety with leaflet instance
+    const newCircles: Record<number, L.Circle> = {};
 
     cities.forEach(city => {
       const style = statusStyles[city.safetyStatus];

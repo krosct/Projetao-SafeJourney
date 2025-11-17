@@ -1,16 +1,25 @@
 import React from 'react';
 import { Course, Program } from '../types';
+import { ChevronRightIcon } from './icons/ChevronRightIcon';
 
 interface CourseCardProps {
     course: Course;
     program: Program | undefined;
     onSelect: (course: Course) => void;
+    onProgramLinkSelect?: (program: Program) => void;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course, program, onSelect }) => {
+export const CourseCard: React.FC<CourseCardProps> = ({ course, program, onSelect, onProgramLinkSelect }) => {
     const hasDiscount = course.discountPercentage && course.discountPercentage > 0;
     const finalPrice = hasDiscount ? Math.round(course.price * (1 - course.discountPercentage! / 100)) : course.price;
     
+    const handleProgramClick = (e: React.MouseEvent) => {
+        if (program && onProgramLinkSelect) {
+            e.stopPropagation();
+            onProgramLinkSelect(program);
+        }
+    };
+
     return (
         <div 
             onClick={() => onSelect(course)}
@@ -41,10 +50,26 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, program, onSelec
                 <p className="mt-3 text-base text-gray-500 flex-grow">{course.description}</p>
                 
                 <div className="mt-auto pt-4">
-                    <div className="mt-4 p-3 bg-teal-50 rounded-md border border-teal-200">
-                        <p className="text-sm font-semibold text-teal-800">Vinculado ao programa:</p>
-                        <p className="text-sm text-teal-700 truncate">{program ? program.name : 'Programa não encontrado'}</p>
-                    </div>
+                     {program && (
+                         <div 
+                            onClick={handleProgramClick}
+                            className={`
+                                mt-4 p-3 rounded-xl shadow-inner
+                                border-2 border-dashed border-cyan-300
+                                bg-gradient-to-br from-green-50 to-cyan-50
+                                group/link transition-all duration-300
+                                ${onProgramLinkSelect ? 'cursor-pointer hover:from-green-100 hover:to-cyan-100 hover:border-solid hover:border-cyan-400 hover:shadow-sm' : ''}
+                            `}
+                        >
+                            <div className="flex justify-between items-center">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-cyan-800/80">Vinculado ao programa:</p>
+                                    <p className="text-sm font-semibold text-cyan-900">{program.name}</p>
+                                </div>
+                                {onProgramLinkSelect && <ChevronRightIcon className="w-5 h-5 text-cyan-500 transition-transform group-hover/link:translate-x-0.5 flex-shrink-0 ml-2" />}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="mt-4 pt-4 border-t border-gray-100 text-sm font-medium text-gray-700">
                         <p>com <span className="font-semibold">{course.instructor}</span></p>
