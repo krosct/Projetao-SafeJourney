@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     // Se estiver rodando no GitHub Actions (para o Pages), usa o subdiretório.
     // Caso contrário (Vercel ou Localhost), usa a raiz '/'.
     const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
-    const baseUrl = isGitHubPages ? '/projetao-safejourney/' : '/';
+    const baseUrl = isGitHubPages ? '/Projetao-SafeJourney/' : '/';
 
     
     return {
