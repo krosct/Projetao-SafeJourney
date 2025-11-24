@@ -38,7 +38,7 @@ const content: { [key: string]: ContentPageData } = {
       content: [
         { subtitle: "", text: "Se você tiver alguma dúvida sobre como lidamos com dados do usuário e informações pessoais, entre em contato conosco." },
         { subtitle: "", text: "Nossa equipe de suporte está disponível para ajudar com quaisquer perguntas sobre programas, agências ou sobre a plataforma." },
-        { subtitle: "Email", text: "contato@Woman GO Safe.com" },
+        { subtitle: "Email", text: "contato@womangosafe.com" },
         { subtitle: "Telefone", text: "(11) 99999-8888" },
       ]
     }]
