@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="./components/WomanGoSafeLogo.png" alt="Logo" width="120" />
-  <img src="./components/WomanGoSafeTitle.png" alt="Logo" width="400" />
+  <img src="components/WomanGoSafeLogo.png?v=1" alt="Logo Woman GO Safe" width="120" />
+  <img src="components/WomanGoSafeTitle.png?v=1" alt="Título Woman GO Safe" width="400" />
   
   **Explore o mundo com confiança. Feito por mulheres, para mulheres.**
 
