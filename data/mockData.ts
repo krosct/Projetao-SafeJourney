@@ -2,22 +2,20 @@ import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from 
 
 // --- CONSTANTS ---
 export const CERTIFICATIONS = [
-  "Suporte Local 24/7",
-  "Acomodações Seguras Verificadas",
+  "Suporte 24/7",
+  "Selo de Diversidade e Inclusão",
   "Treinamento Pré-Partida Abrangente",
   "Transparência Financeira Total",
   "Parcerias Comunitárias Éticas",
 ];
 
 export const VERIFICATIONS = [
-  "Selo Woman GO Safe Premium",
   "Ideal para Primeira Viagem",
-  "Foco em Liderança Feminina",
+  "Acomodação Female-Only",
   "Imersão Cultural Profunda",
-  "Conexão com a Comunidade Local",
+  "Vizinhança Auditada (Safe Walk)",
   "Acessibilidade para PCD",
-  "Programa Sustentável e Ecológico",
-  "Oportunidades de Networking",
+  "Saúde da Mulher no Local",
   "Flexibilidade de Datas e Pagamento",
   "Avaliação Excepcional das Alunas",
 ];
@@ -99,7 +97,8 @@ export const agencies: Agency[] = Array.from({ length: 20 }, (_, i) => {
     return {
         id: i + 1,
         name: agencyNames[i],
-        isVerified: isTopAgency || Math.random() > 0.4,
+        isVerified: isTopAgency,
+        // isVerified: isTopAgency || Math.random() > 0.4,
         verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Woman GO Safe." : "Verificada pela Woman GO Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
         description: `Agência especializada em ${getRandom(programSubjects)} e ${getRandom(programSubjects)}.`,
         certifications: certs,

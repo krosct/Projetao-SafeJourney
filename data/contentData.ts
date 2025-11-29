@@ -1,18 +1,18 @@
 import { ContentPageData } from '../types';
 
 export const certificationsContent: ContentPageData = {
-  title: "Certificações e Verificações",
+  title: "Padrão Woman GO Safe",
   sections: [
     {
-      title: "Certificações da Agência",
+      title: "Certificações da Agência (Confiança Institucional)",
       content: [
         {
-          subtitle: "Suporte Local 24/7",
+          subtitle: "Suporte 24/7",
           text: "Garante que a intercambista terá apoio contínuo no destino, a qualquer hora do dia ou da noite, para emergências ou qualquer necessidade que surja."
         },
         {
-          subtitle: "Acomodações Seguras Verificadas",
-          text: "Significa que todas as opções de moradia foram inspecionadas e aprovadas, seguindo critérios rigorosos de segurança, limpeza e localização."
+          subtitle: "Selo de Diversidade e Inclusão",
+          text: "Ambiente seguro e acolhedor para todas as mulheres, incluindo compromisso real com pautas raciais e LGBTQIA+."
         },
         {
           subtitle: "Treinamento Pré-Partida Abrangente",
@@ -20,7 +20,7 @@ export const certificationsContent: ContentPageData = {
         },
         {
           subtitle: "Transparência Financeira Total",
-          text: "Todos os custos do programa são claramente detalhados, sem taxas ocultas, garantindo que a intercambista saiba exatamente pelo que está pagando."
+          text: "Garantia de que não existem taxas ocultas. Auditoria de contratos para evitar cláusulas abusivas de cancelamento."
         },
         {
           subtitle: "Parcerias Comunitárias Éticas",
@@ -29,47 +29,39 @@ export const certificationsContent: ContentPageData = {
       ]
     },
     {
-      title: "Selos de Verificação do Programa",
+      title: "Verificações do Programa (Experiência no Destino)",
       content: [
         {
-          subtitle: "Selo Woman GO Safe Premium",
-          text: "Programas que atingem o mais alto padrão de excelência em todos os nossos critérios de avaliação, oferecendo uma experiência excepcional."
-        },
-        {
           subtitle: "Ideal para Primeira Viagem",
-          text: "Programas especialmente desenhados para quem nunca viajou sozinha, com suporte extra, atividades de integração e um ambiente acolhedor."
+          text: "Programas desenhados com suporte extra de 'boas-vindas', incluindo transfer do aeroporto, chip de celular e tour de reconhecimento da cidade."
         },
         {
-          subtitle: "Foco em Liderança Feminina",
-          text: "Este programa inclui workshops, mentorias ou atividades focadas no desenvolvimento de habilidades de liderança para mulheres."
+          subtitle: "Acomodação Female-Only",
+          text: "Garantia de quartos exclusivos para mulheres ou residências (homestays) onde a presença masculina foi checada e validada."
         },
         {
           subtitle: "Imersão Cultural Profunda",
           text: "Oferece uma experiência que vai além do turismo, promovendo um contato genuíno com os costumes, a língua e o dia a dia da comunidade local."
         },
         {
-          subtitle: "Conexão com a Comunidade Local",
-          text: "O programa facilita a interação e criação de laços com os moradores locais, seja através de voluntariado, eventos ou projetos comunitários."
+          subtitle: "Vizinhança Auditada (Safe Walk)",
+          text: "Auditoria do trajeto entre acomodação e escola. Verificamos iluminação pública, movimento e histórico de segurança da vizinhança."
         },
         {
-            subtitle: "Acessibilidade para PCD",
-            text: "Este programa e suas acomodações possuem infraestrutura para receber pessoas com deficiência, garantindo uma experiência inclusiva."
+          subtitle: "Acessibilidade para PCD",
+          text: "Verificação presencial de rampas, elevadores e banheiros adaptados na escola e acomodação, além de transporte público acessível."
         },
         {
-            subtitle: "Programa Sustentável e Ecológico",
-            text: "Focado em práticas que respeitam o meio ambiente e promovem a sustentabilidade na comunidade local."
+          subtitle: "Saúde da Mulher no Local",
+          text: "Mapeamento de ginecologistas e farmácias próximas com acesso facilitado a contraceptivos e itens de higiene feminina."
         },
         {
-            subtitle: "Oportunidades de Networking",
-            text: "Proporciona eventos e conexões que podem enriquecer a rede de contatos profissionais e pessoais da intercambista."
+          subtitle: "Flexibilidade de Datas e Pagamento",
+          text: "Oferece opções flexíveis para início do programa e formas de pagamento, facilitando o planejamento da intercambista."
         },
         {
-            subtitle: "Flexibilidade de Datas e Pagamento",
-            text: "Oferece opções flexíveis para início do programa e formas de pagamento, facilitando o planejamento da intercambista."
-        },
-        {
-            subtitle: "Avaliação Excepcional das Alunas",
-            text: "Este programa possui uma média de avaliação consistentemente alta, sendo um dos favoritos das nossas usuárias."
+          subtitle: "Avaliação Excepcional das Alunas",
+          text: "Este programa possui uma média de avaliação consistentemente alta, sendo um dos favoritos das nossas usuárias."
         }
       ]
     }

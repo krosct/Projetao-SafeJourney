@@ -94,26 +94,82 @@ const StarIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) =
     </svg>
 );
 
+// --- New Icons for Advanced Features ---
+
+const ShieldExclamationIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+    </svg>
+);
+
+const UserCircleIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </svg>
+);
+
+const ScaleIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.48 0-2.75-1.27-2.75-2.75 0-1.48 1.27-2.75 2.75-2.75s2.75 1.27 2.75 2.75c0 1.48-1.27 2.75-2.75 2.75Zm0 0V3m0 0L7.5 7.5m4.5-4.5L16.5 7.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 12h-3.75M7.5 12H3.75" />
+    </svg>
+);
+
+const KeyIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+    </svg>
+);
+
+const EyeIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </svg>
+);
+
+const HeartIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+    </svg>
+);
+
+const PuzzlePieceIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .663-.658v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.137.633.36.851 2.246.215 4.455.176 6.556-1.135a.656.656 0 0 0 .33-.565v0c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186-1.613.293-3.25.315-4.907a.656.656 0 0 1-.658-.663v0c-.355 0-.676.186-.959.401a1.647 1.647 0 0 0-1.003.349c-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.369 0 .713.128 1.003.349.283.215.604.401.959.401v0c.31 0 .555-.26.532-.57a48.039 48.039 0 0 1 .642-5.056c-1.518-.19-3.058-.309-4.616-.354a.64.64 0 0 0-.663.658v0Z" />
+    </svg>
+);
+
+const ChipIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+    </svg>
+);
+
 // --- Feature Mapping ---
 
 const featureMap: { [key: string]: { Icon: React.FC<any>; colorClasses: string } } = {
   // Certifications
-  "Suporte Local 24/7": { Icon: PhoneIcon, colorClasses: 'bg-teal-100 text-teal-600' },
-  "Acomodações Seguras Verificadas": { Icon: HomeIcon, colorClasses: 'bg-cyan-100 text-bg-rose-400' },
+  "Suporte 24/7": { Icon: PhoneIcon, colorClasses: 'bg-teal-100 text-teal-600' },
+  "Parcerias Comunitárias Éticas": { Icon: HeartIcon, colorClasses: 'bg-pink-100 text-pink-600' },
+  // "Acomodações Seguras Verificadas": { Icon: HomeIcon, colorClasses: 'bg-cyan-100 text-bg-rose-400' },
   "Treinamento Pré-Partida Abrangente": { Icon: AcademicCapIcon, colorClasses: 'bg-blue-100 text-blue-600' },
   "Transparência Financeira Total": { Icon: BanknotesIcon, colorClasses: 'bg-green-100 text-green-600' },
-  "Parcerias Comunitárias Éticas": { Icon: UsersIcon, colorClasses: 'bg-indigo-100 text-indigo-600' },
+  "Selo de Diversidade e Inclusão": { Icon: UsersIcon, colorClasses: 'bg-indigo-100 text-indigo-600' },
   // Verifications
-  "Selo Woman GO Safe Premium": { Icon: TrophyIcon, colorClasses: 'bg-amber-100 text-amber-600' },
+  // "Selo Woman GO Safe Premium": { Icon: TrophyIcon, colorClasses: 'bg-amber-100 text-amber-600' },
   "Ideal para Primeira Viagem": { Icon: SparklesIcon, colorClasses: 'bg-yellow-100 text-yellow-600' },
-  "Foco em Liderança Feminina": { Icon: UserGroupIcon, colorClasses: 'bg-pink-100 text-pink-600' },
+  "Acomodação Female-Only": { Icon: KeyIcon, colorClasses: 'bg-rose-100 text-rose-600' },
+  // "Foco em Liderança Feminina": { Icon: UserGroupIcon, colorClasses: 'bg-pink-100 text-pink-600' },
   "Imersão Cultural Profunda": { Icon: GlobeAltIcon, colorClasses: 'bg-orange-100 text-orange-600' },
-  "Conexão com a Comunidade Local": { Icon: ChatBubbleLeftRightIcon, colorClasses: 'bg-purple-100 text-purple-600' },
+  // "Conexão com a Comunidade Local": { Icon: ChatBubbleLeftRightIcon, colorClasses: 'bg-purple-100 text-purple-600' },
   "Acessibilidade para PCD": { Icon: AccessibilityIcon, colorClasses: 'bg-gray-100 text-gray-600' },
-  "Programa Sustentável e Ecológico": { Icon: LeafIcon, colorClasses: 'bg-lime-100 text-lime-600' },
-  "Oportunidades de Networking": { Icon: ShareIcon, colorClasses: 'bg-sky-100 text-sky-600' },
+  // "Programa Sustentável e Ecológico": { Icon: LeafIcon, colorClasses: 'bg-lime-100 text-lime-600' },
+  // "Oportunidades de Networking": { Icon: ShareIcon, colorClasses: 'bg-sky-100 text-sky-600' },
   "Flexibilidade de Datas e Pagamento": { Icon: CalendarDaysIcon, colorClasses: 'bg-rose-100 text-rose-400' },
   "Avaliação Excepcional das Alunas": { Icon: StarIcon, colorClasses: 'bg-amber-100 text-amber-600' },
+  "Vizinhança Auditada (Safe Walk)": { Icon: EyeIcon, colorClasses: 'bg-orange-100 text-orange-600' },
+  "Saúde da Mulher no Local": { Icon: HeartIcon, colorClasses: 'bg-red-100 text-red-600' },
 };
 
 // --- Single Icon Component ---
