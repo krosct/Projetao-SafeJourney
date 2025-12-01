@@ -27,7 +27,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, program, onSelec
         >
             <div className="p-6 flex flex-col flex-grow">
                 <div className="flex justify-between items-start">
-                    <span className={`inline-block px-3 py-1 text-xs font-semibold uppercase rounded-full ${course.type === 'Curso' ? 'bg-rose-100/bg-pink-100 text-rose-400' : 'bg-[#daa520]/20 text-[#b8860b]'}`}>
+                    <span className={`inline-block px-3 py-1 text-xs font-semibold uppercase rounded-full ${course.type === 'Curso' ? 'bg-rose-100 text-rose-600' : 'bg-[#daa520]/20 text-[#b8860b]'}`}>
                         {course.type}
                     </span>
                     

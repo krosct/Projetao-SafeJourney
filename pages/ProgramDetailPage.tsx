@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Program, ContentPageData, Course } from '../types';
 import { VerifiedSeal } from '../components/VerifiedSeal';
 import { CheckmarkIcon } from '../components/icons/CheckmarkIcon';
@@ -7,6 +8,7 @@ import { WarningIcon } from '../components/icons/WarningIcon';
 import { ProgramFeatures } from '../components/FeatureIcons';
 import { certificationsContent } from '../data/contentData';
 import { CourseCard } from '../components/CourseCard';
+import { PurchaseModal } from '../components/PurchaseModal';
 
 interface ProgramDetailPageProps {
   program: Program;
@@ -37,12 +39,17 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
   onCourseSelect,
   onNavigateToHub
 }) => {
+  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false); // Estado para controlar o modal de compra
+
   const avgRating = program.feedbacks.reduce((acc, curr) => acc + curr.rating, 0) / (program.feedbacks.length || 1);
   const agencyCertifications = program.agency.certifications || [];
   const programVerifications = program.verifications || [];
 
   // Filtra os cursos vinculados a este programa
   const programCourses = courses.filter(c => c.programId === program.id);
+
+  // Mock de usuário atual para pré-preencher o modal (num app real viria do Context)
+  const mockUser = { name: 'Visitante', email: '', avatar: '' };
 
   return (
     <div className="bg-white">
@@ -167,15 +174,38 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
                   ))}
                 </ul>
               </div>
-              <button 
-                onClick={() => onInfoRequest(program)}
-                className="mt-8 w-full bg-rose-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-rose-400 transition-transform transform hover:scale-105">
-                Solicitar Informações
-              </button>
+              
+              <div className="mt-8 space-y-4">
+                <button 
+                  onClick={() => onInfoRequest(program)}
+                  className="w-full bg-white text-rose-500 border-2 border-rose-500 font-bold py-3 px-4 rounded-lg hover:bg-rose-50 transition-colors"
+                >
+                  Solicitar Informações
+                </button>
+
+                <button 
+                  onClick={() => setPurchaseModalOpen(true)}
+                  className="w-full bg-emerald-500 text-white font-bold py-4 px-4 rounded-lg shadow-md hover:bg-emerald-600 hover:shadow-lg transition-all transform hover:scale-[1.02] flex justify-center items-center gap-2"
+                >
+                  <span>Comprar Agora</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                  </svg>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Modal de Compra */}
+      <PurchaseModal 
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setPurchaseModalOpen(false)}
+        program={program}
+        currentUser={mockUser}
+      />
     </div>
   );
 };

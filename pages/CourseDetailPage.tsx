@@ -51,7 +51,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, rela
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Left Column - Details */}
           <div className="lg:col-span-3">
-            <span className={`inline-block px-3 py-1 text-sm font-semibold uppercase rounded-full mb-3 ${course.type === 'Curso' ? 'bg-rose-100/bg-pink-100 text-rose-400' : 'bg-[#daa520]/20 text-[#b8860b]'}`}>
+            <span className={`inline-block px-3 py-1 text-sm font-semibold uppercase rounded-full mb-3 ${course.type === 'Curso' ? 'bg-rose-100 text-rose-600' : 'bg-[#daa520]/20 text-[#b8860b]'}`}>
               {course.type}
             </span>
             <h1 className="text-4xl font-extrabold text-gray-900">{course.title}</h1>

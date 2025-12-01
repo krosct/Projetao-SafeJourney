@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Page, Program, Agency, Course, User, ContentPageData } from './types';
 import { Header } from './components/Header';
@@ -152,7 +153,7 @@ const App: React.FC = () => {
     navigate('agencyDetail');
   };
 
-  const handleNavigate = (page: 'home' | 'programs' | 'map' | 'hub' | 'login') => {
+  const handleNavigate = (page: Page) => {
     if (page === 'programs') {
         setInitialQuery('');
         setInitialAgencyId('');
@@ -182,9 +183,8 @@ const App: React.FC = () => {
     setInfoModalOpen(true);
   };
 
-  const getActivePageForHeader = (): 'home' | 'programs' | 'map' | 'hub' => {
-    const lastNavPage = [...history].reverse().find(p => ['home', 'programs', 'map', 'hub'].includes(p));
-    return (lastNavPage as 'home' | 'programs' | 'map' | 'hub') || 'home';
+  const getActivePageForHeader = (): Page => {
+    return currentPage;
   };
 
 
@@ -207,8 +207,9 @@ const App: React.FC = () => {
               onReport={() => setReportModalOpen(true)} 
               onInfoRequest={handleInfoRequest}
               onNavigateToContent={handleNavigateToContent}
-              courses={courses}                        // <-- nova prop: lista completa de cursos
+              courses={allCourses}                        // <-- nova prop: lista completa de cursos
               onCourseSelect={handleCourseSelect}      // <-- nova prop: handler ao selecionar curso
+              onNavigateToHub={() => navigate('hub')}
             />;
           }
         return <HomePage onProgramSelect={handleProgramSelect} onNavigate={handleNavigate} onSearch={handleSearch}/>;
@@ -270,18 +271,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {currentPage !== 'agencyDashboard' && (
-        <Header 
-          onNavigate={handleNavigate} 
-          activePage={getActivePageForHeader()}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-        />
-      )}
+      <Header 
+        onNavigate={handleNavigate} 
+        activePage={getActivePageForHeader()}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
       <main className="flex-grow">
         {renderPage()}
       </main>
-      {currentPage !== 'agencyDashboard' && <Footer onNavigateToContent={handleNavigateToContent} />}
+      <Footer onNavigateToContent={handleNavigateToContent} />
       {selectedProgram && (
         <ReportModal 
           isOpen={isReportModalOpen} 

@@ -42,8 +42,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
   // Filter data for this agency
   const myPrograms = programs.filter(p => p.agency.id === agency.id);
-  const myCourses = courses.filter(c => myPrograms.some(p => p.id === c.programId)); // Assuming courses are linked to programs, or we filter by agency if course had agencyId directly. 
-  // Looking at types.ts, Course has programId. Program has agency. So this logic holds.
+  const myCourses = courses.filter(c => myPrograms.some(p => p.id === c.programId));
 
   // Stats
   const totalPrograms = myPrograms.length;
@@ -109,21 +108,44 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div className="bg-gray-50 min-h-[calc(100vh-80px)]">
+      {/* CSS Local para forçar scrollbar clara e inputs claros */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f3f4f6; /* cinza bem claro */
+          border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: #d1d5db; /* cinza médio */
+          border-radius: 6px;
+          border: 2px solid #f3f4f6;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: #9ca3af;
+        }
+        /* Forçar esquema de cor clara para controles nativos neste componente */
+        .force-light-scheme {
+          color-scheme: light;
+        }
+      `}</style>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Dashboard Title & Welcome */}
+        <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold text-gray-900">Painel da Agência</h1>
+            <p className="mt-2 text-lg text-gray-600">Gerencie seus programas, cursos e visualize seu desempenho.</p>
+          </div>
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Painel da Agência</h1>
-            <span className="ml-4 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-sm font-medium">
+            <span className="px-4 py-2 rounded-full bg-rose-100 text-rose-800 text-lg font-bold shadow-sm">
               {agency.name}
             </span>
           </div>
-          <button onClick={onLogout} className="text-gray-600 hover:text-gray-900">Sair</button>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-8">
           <nav className="-mb-px flex space-x-8">
@@ -135,7 +157,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                   activeTab === tab
                     ? 'border-rose-500 text-rose-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg capitalize transition-colors`}
               >
                 {tab === 'overview' ? 'Visão Geral' : tab === 'programs' ? 'Meus Programas' : 'Cursos e Mentorias'}
               </button>
@@ -145,50 +167,44 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
         {/* Content */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Total de Programas</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900">{totalPrograms}</dd>
-              </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
+                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Total de Programas</dt>
+                <dd className="mt-2 text-4xl font-extrabold text-gray-900">{totalPrograms}</dd>
             </div>
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Total de Cursos/Mentorias</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900">{totalCourses}</dd>
-              </div>
+            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
+                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Total de Cursos</dt>
+                <dd className="mt-2 text-4xl font-extrabold text-gray-900">{totalCourses}</dd>
             </div>
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Avaliação Média</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900 flex items-center">
-                  {avgRating.toFixed(1)} <StarIcon className="w-6 h-6 text-yellow-400 ml-2" />
+            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
+                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Avaliação Média</dt>
+                <dd className="mt-2 text-4xl font-extrabold text-gray-900 flex items-center">
+                  {avgRating.toFixed(1)} <StarIcon className="w-8 h-8 text-yellow-400 ml-2" />
                 </dd>
-              </div>
             </div>
             
-            <div className="col-span-3 mt-8">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Feedbacks Recentes</h3>
-                <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                    <ul className="divide-y divide-gray-200">
+            <div className="col-span-1 sm:col-span-3 mt-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Feedbacks Recentes</h3>
+                <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100">
+                    <ul className="divide-y divide-gray-100">
                         {allFeedbacks.slice(0, 5).map((feedback) => (
-                            <li key={feedback.id} className="px-4 py-4 sm:px-6">
-                                <div className="flex items-center justify-between">
+                            <li key={feedback.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+                                <div className="flex items-start justify-between">
                                     <div className="flex items-center">
-                                        <img className="h-10 w-10 rounded-full" src={feedback.avatar} alt="" />
+                                        <img className="h-12 w-12 rounded-full border-2 border-white shadow-sm" src={feedback.avatar} alt="" />
                                         <div className="ml-4">
-                                            <p className="text-sm font-medium text-rose-600 truncate">{feedback.author}</p>
-                                            <p className="text-sm text-gray-500">{feedback.comment}</p>
+                                            <p className="text-base font-semibold text-rose-600">{feedback.author}</p>
+                                            <p className="text-sm text-gray-600 mt-1 italic">"{feedback.comment}"</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center">
-                                        <span className="text-sm text-gray-500 mr-2">{feedback.rating}</span>
-                                        <StarIcon className="h-5 w-5 text-yellow-400" />
+                                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
+                                        <span className="text-sm font-bold text-yellow-700 mr-1">{feedback.rating}</span>
+                                        <StarIcon className="h-4 w-4 text-yellow-400" />
                                     </div>
                                 </div>
                             </li>
                         ))}
-                        {allFeedbacks.length === 0 && <li className="px-4 py-4 text-gray-500">Nenhum feedback ainda.</li>}
+                        {allFeedbacks.length === 0 && <li className="px-6 py-8 text-center text-gray-500">Nenhum feedback recebido ainda.</li>}
                     </ul>
                 </div>
             </div>
@@ -197,12 +213,12 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
         {activeTab === 'programs' && (
           <div>
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-8">
               <button
                 onClick={() => { setEditingProgram(null); setProgramModalOpen(true); }}
-                className="bg-rose-600 text-white px-4 py-2 rounded-md hover:bg-rose-700"
+                className="bg-rose-500 text-white px-6 py-3 rounded-lg hover:bg-rose-600 font-bold shadow-md transition-transform transform hover:scale-105"
               >
-                Novo Programa
+                + Novo Programa
               </button>
             </div>
             
@@ -220,8 +236,8 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 text-gray-500 bg-white rounded-lg shadow">
-                <p>Nenhum programa cadastrado.</p>
+              <div className="text-center py-24 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-200">
+                <p className="text-lg">Você ainda não tem programas cadastrados.</p>
               </div>
             )}
           </div>
@@ -229,12 +245,12 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
         {activeTab === 'courses' && (
           <div>
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-8">
               <button
                 onClick={() => { setEditingCourse(null); setCourseModalOpen(true); }}
-                className="bg-rose-600 text-white px-4 py-2 rounded-md hover:bg-rose-700"
+                className="bg-rose-500 text-white px-6 py-3 rounded-lg hover:bg-rose-600 font-bold shadow-md transition-transform transform hover:scale-105"
               >
-                Novo Curso/Mentoria
+                + Novo Curso/Mentoria
               </button>
             </div>
             
@@ -256,49 +272,49 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 text-gray-500 bg-white rounded-lg shadow">
-                <p>Nenhum curso ou mentoria cadastrado.</p>
+              <div className="text-center py-24 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-200">
+                <p className="text-lg">Você ainda não tem cursos ou mentorias cadastradas.</p>
               </div>
             )}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Program Modal */}
       {isProgramModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">{editingProgram ? 'Editar Programa' : 'Novo Programa'}</h2>
-            <form onSubmit={handleSaveProgram} className="space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-4">{editingProgram ? 'Editar Programa' : 'Novo Programa'}</h2>
+            <form onSubmit={handleSaveProgram} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nome</label>
-                <input name="name" defaultValue={editingProgram?.name} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Nome do Programa</label>
+                <input name="name" defaultValue={editingProgram?.name} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Cidade</label>
-                    <input name="destinationCity" defaultValue={editingProgram?.destinationCity} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
+                    <input name="destinationCity" defaultValue={editingProgram?.destinationCity} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">País</label>
-                    <input name="destinationCountry" defaultValue={editingProgram?.destinationCountry} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">País</label>
+                    <input name="destinationCountry" defaultValue={editingProgram?.destinationCountry} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Preço</label>
-                <input name="price" type="number" defaultValue={editingProgram?.price} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Preço ($)</label>
+                <input name="price" type="number" defaultValue={editingProgram?.price} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Descrição</label>
-                <textarea name="longDescription" defaultValue={editingProgram?.longDescription} required rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Descrição Detalhada</label>
+                <textarea name="longDescription" defaultValue={editingProgram?.longDescription} required rows={4} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Inclusos (separados por vírgula)</label>
-                <input name="includes" defaultValue={editingProgram?.includes?.join(', ') || ''} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Inclusos (separados por vírgula)</label>
+                <input name="includes" defaultValue={editingProgram?.includes?.join(', ') || ''} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" placeholder="Ex: Acomodação, Voo, Curso..." />
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setProgramModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700">Salvar</button>
+              <div className="flex justify-end space-x-3 mt-8 pt-4 border-t">
+                <button type="button" onClick={() => setProgramModalOpen(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-bold shadow-md">Salvar Programa</button>
               </div>
             </form>
           </div>
@@ -307,53 +323,53 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
       {/* Program View Modal */}
       {isViewModalOpen && viewingProgram && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-             <div className="flex justify-between items-start mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">{viewingProgram.name}</h2>
-                <button onClick={() => setViewModalOpen(false)} className="text-gray-400 hover:text-gray-500">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+             <div className="flex justify-between items-start mb-6">
+                <h2 className="text-3xl font-extrabold text-gray-900">{viewingProgram.name}</h2>
+                <button onClick={() => setViewModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                   <span className="sr-only">Fechar</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
              </div>
              
-             <img src={viewingProgram.image} alt={viewingProgram.name} className="w-full h-64 object-cover rounded-lg mb-6" />
+             <img src={viewingProgram.image} alt={viewingProgram.name} className="w-full h-64 object-cover rounded-xl shadow-md mb-8" />
              
-             <div className="space-y-4">
-                <div className="flex justify-between text-lg border-b pb-2">
+             <div className="space-y-6">
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
                     <span className="font-semibold text-gray-700">Localização:</span>
                     <span>{viewingProgram.destinationCity}, {viewingProgram.destinationCountry}</span>
                 </div>
-                <div className="flex justify-between text-lg border-b pb-2">
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
                     <span className="font-semibold text-gray-700">Preço:</span>
-                    <span className="font-bold text-rose-600">${viewingProgram.price}</span>
+                    <span className="font-bold text-rose-600 text-2xl">${viewingProgram.price}</span>
                 </div>
 
                 <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Descrição Completa</h3>
-                    <p className="text-gray-600 whitespace-pre-line text-sm">{viewingProgram.longDescription}</p>
+                    <h3 className="font-bold text-gray-800 mb-2">Descrição Completa</h3>
+                    <p className="text-gray-600 whitespace-pre-line leading-relaxed">{viewingProgram.longDescription}</p>
                 </div>
 
                 <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">O que está incluso</h3>
-                    <ul className="list-disc list-inside text-gray-600 text-sm">
+                    <h3 className="font-bold text-gray-800 mb-2">O que está incluso</h3>
+                    <div className="flex flex-wrap gap-2">
                         {viewingProgram.includes.map((item, idx) => (
-                            <li key={idx}>{item}</li>
+                            <span key={idx} className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-sm font-medium border border-rose-100">{item}</span>
                         ))}
-                    </ul>
+                    </div>
                 </div>
              </div>
 
-             <div className="mt-8 flex justify-end space-x-3 border-t pt-6">
+             <div className="mt-10 flex justify-end space-x-4 border-t pt-6">
                 <button 
                     onClick={() => {
                         setViewModalOpen(false);
                         setEditingProgram(viewingProgram);
                         setProgramModalOpen(true);
                     }}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-sm"
                 >
                     Editar
                 </button>
@@ -364,7 +380,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                             setViewModalOpen(false);
                         }
                     }}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold shadow-sm"
                 >
                     Excluir
                 </button>
@@ -375,48 +391,61 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
       {/* Course Modal */}
       {isCourseModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-            <h2 className="text-xl font-bold mb-4">{editingCourse ? 'Editar Curso/Mentoria' : 'Novo Curso/Mentoria'}</h2>
-            <form onSubmit={handleSaveCourse} className="space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-4">{editingCourse ? 'Editar Curso/Mentoria' : 'Novo Curso/Mentoria'}</h2>
+            <form onSubmit={handleSaveCourse} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Título</label>
-                <input name="title" defaultValue={editingCourse?.title} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Título</label>
+                <input name="title" defaultValue={editingCourse?.title} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
               </div>
+              <div className="grid grid-cols-2 gap-5">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
+                    <select name="type" defaultValue={editingCourse?.type || 'Curso'} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900">
+                        <option value="Curso">Curso</option>
+                        <option value="Mentoria">Mentoria</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Programa Vinculado</label>
+                    <select name="programId" defaultValue={editingCourse?.programId} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900">
+                        {myPrograms.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                    </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-5">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Instrutor</label>
+                    <input name="instructor" defaultValue={editingCourse?.instructor} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Parceiro</label>
+                    <input name="partner" defaultValue={editingCourse?.partner} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-5">
+                 <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Preço ($)</label>
+                    <input name="price" type="number" defaultValue={editingCourse?.price} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                 </div>
+                 <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Desconto (%)</label>
+                    <input name="discountPercentage" type="number" min="0" max="100" defaultValue={editingCourse?.discountPercentage} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                 </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Tipo</label>
-                <select name="type" defaultValue={editingCourse?.type || 'Curso'} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    <option value="Curso">Curso</option>
-                    <option value="Mentoria">Mentoria</option>
-                </select>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Descrição</label>
+                <textarea name="description" defaultValue={editingCourse?.description} required rows={3} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Programa Vinculado</label>
-                <select name="programId" defaultValue={editingCourse?.programId} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    {myPrograms.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instrutor</label>
-                <input name="instructor" defaultValue={editingCourse?.instructor} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Parceiro</label>
-                <input name="partner" defaultValue={editingCourse?.partner} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Preço</label>
-                <input name="price" type="number" defaultValue={editingCourse?.price} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Descrição</label>
-                <textarea name="description" defaultValue={editingCourse?.description} required rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setCourseModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700">Salvar</button>
+              <div className="flex justify-end space-x-3 mt-8 pt-4 border-t">
+                <button type="button" onClick={() => setCourseModalOpen(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-bold shadow-md">Salvar</button>
               </div>
             </form>
           </div>
@@ -425,71 +454,72 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
       {/* Course View Modal */}
       {isCourseViewModalOpen && viewingCourse && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-             <div className="flex justify-between items-start mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+             <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">{viewingCourse.title}</h2>
-                <button onClick={() => setCourseViewModalOpen(false)} className="text-gray-400 hover:text-gray-500">
+                <button onClick={() => setCourseViewModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                   <span className="sr-only">Fechar</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
              </div>
              
-             <div className="space-y-4">
-                <div className="flex justify-between text-lg border-b pb-2">
+             <div className="space-y-6">
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
                     <span className="font-semibold text-gray-700">Tipo:</span>
-                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${viewingCourse.type === 'Curso' ? 'bg-rose-100 text-rose-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide ${viewingCourse.type === 'Curso' ? 'bg-rose-100 text-rose-800' : 'bg-yellow-100 text-yellow-800'}`}>
                         {viewingCourse.type}
                     </span>
                 </div>
-                <div className="flex justify-between text-lg border-b pb-2">
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
                     <span className="font-semibold text-gray-700">Preço:</span>
                     <div className="text-right">
                         {viewingCourse.discountPercentage && viewingCourse.discountPercentage > 0 ? (
                             <>
-                                <span className="text-gray-500 line-through text-sm mr-2">${viewingCourse.price}</span>
-                                <span className="font-bold text-rose-600">${Math.round(viewingCourse.price * (1 - viewingCourse.discountPercentage / 100))}</span>
-                                <span className="ml-2 text-xs text-red-600 font-semibold">({viewingCourse.discountPercentage}% OFF)</span>
+                                <span className="text-gray-400 line-through text-base mr-2">${viewingCourse.price}</span>
+                                <span className="font-bold text-rose-600 text-2xl">${Math.round(viewingCourse.price * (1 - viewingCourse.discountPercentage / 100))}</span>
+                                <span className="ml-2 text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full">({viewingCourse.discountPercentage}% OFF)</span>
                             </>
                         ) : (
-                            <span className="font-bold text-rose-600">${viewingCourse.price}</span>
+                            <span className="font-bold text-rose-600 text-2xl">${viewingCourse.price}</span>
                         )}
                     </div>
                 </div>
                 
-                <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Instrutor</h3>
-                    <p className="text-gray-600">{viewingCourse.instructor}</p>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Instrutor</h3>
+                        <p className="text-gray-800 font-medium">{viewingCourse.instructor}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Parceiro</h3>
+                        <p className="text-gray-800 font-medium">{viewingCourse.partner}</p>
+                    </div>
                 </div>
 
                 <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Parceiro</h3>
-                    <p className="text-gray-600">{viewingCourse.partner}</p>
+                    <h3 className="font-bold text-gray-800 mb-2">Descrição</h3>
+                    <p className="text-gray-600 whitespace-pre-line leading-relaxed">{viewingCourse.description}</p>
                 </div>
 
-                <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Descrição</h3>
-                    <p className="text-gray-600 whitespace-pre-line">{viewingCourse.description}</p>
-                </div>
-
-                <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Programa Vinculado</h3>
-                    <p className="text-gray-600">
+                <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                    <h3 className="font-bold text-rose-800 mb-1">Programa Vinculado</h3>
+                    <p className="text-rose-600 font-medium">
                         {myPrograms.find(p => p.id === viewingCourse.programId)?.name || 'Programa não encontrado'}
                     </p>
                 </div>
              </div>
 
-             <div className="mt-8 flex justify-end space-x-3 border-t pt-6">
+             <div className="mt-10 flex justify-end space-x-4 border-t pt-6">
                 <button 
                     onClick={() => {
                         setCourseViewModalOpen(false);
                         setEditingCourse(viewingCourse);
                         setCourseModalOpen(true);
                     }}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-sm"
                 >
                     Editar
                 </button>
@@ -500,7 +530,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                             setCourseViewModalOpen(false);
                         }
                     }}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold shadow-sm"
                 >
                     Excluir
                 </button>

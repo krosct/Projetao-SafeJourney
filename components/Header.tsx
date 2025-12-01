@@ -1,12 +1,11 @@
+
 import React, { useState } from 'react';
 import { Logo } from './Logo';
-import { User } from '../types';
-
-type NavigablePage = 'home' | 'programs' | 'map' | 'hub' | 'login';
+import { User, Page } from '../types';
 
 interface HeaderProps {
-    onNavigate: (page: NavigablePage) => void;
-    activePage: 'home' | 'programs' | 'map' | 'hub';
+    onNavigate: (page: Page) => void;
+    activePage: Page;
     currentUser: User | null;
     onLogout: () => void;
 }
@@ -14,12 +13,15 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentUser, onLogout }) => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems: { page: 'home' | 'programs' | 'map' | 'hub', label: string }[] = [
+  const navItems: { page: Page, label: string }[] = [
     { page: 'home', label: 'Início' },
     { page: 'programs', label: 'Programas' },
     { page: 'map', label: 'Mapa de Avaliações' },
     { page: 'hub', label: 'Hub de Conhecimento' },
   ];
+
+  // Filter out nav items that might not be suitable for main menu if necessary, 
+  // but here we just stick to the 4 main ones.
 
   const baseClasses = "relative px-1 py-2 text-md font-medium transition-colors duration-300 ease-in-out group";
   const inactiveClasses = "text-gray-600 hover:text-rose-500";
@@ -48,7 +50,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
             <div className="ml-12">
                 {currentUser ? (
                   <div className="flex items-center gap-4">
-                    <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm"/>
+                    <div 
+                        onClick={() => currentUser.email === 'agencia@app.com.br' && onNavigate('agencyDashboard')}
+                        className={`flex items-center gap-2 ${currentUser.email === 'agencia@app.com.br' ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                        title={currentUser.email === 'agencia@app.com.br' ? "Ir para o Painel da Agência" : "Perfil"}
+                    >
+                        <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm"/>
+                    </div>
                     <button
                         onClick={onLogout}
                         className="px-5 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -106,7 +114,15 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
              <div className="border-t my-2"></div>
               {currentUser ? (
                 <div className="pt-2 pb-1 space-y-2">
-                    <div className="flex items-center gap-3 px-3 py-2">
+                    <div 
+                        className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+                        onClick={() => {
+                            if (currentUser.email === 'agencia@app.com.br') {
+                                onNavigate('agencyDashboard');
+                                setMobileMenuOpen(false);
+                            }
+                        }}
+                    >
                         <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover"/>
                         <span className="font-medium text-gray-800">{currentUser.name}</span>
                     </div>
