@@ -5,20 +5,21 @@ import { VerifiedSeal } from '../components/VerifiedSeal';
 import { CheckmarkIcon } from '../components/icons/CheckmarkIcon';
 import { StarIcon } from '../components/icons/StarIcon';
 import { WarningIcon } from '../components/icons/WarningIcon';
-import { ProgramFeatures } from '../components/FeatureIcons';
+import { WomanGoSafeSeal } from '../components/WomanGoSafeSeal';
+import { FeatureIcon } from '../components/FeatureIcons';
 import { certificationsContent } from '../data/contentData';
 import { CourseCard } from '../components/CourseCard';
 import { PurchaseModal } from '../components/PurchaseModal';
 
 interface ProgramDetailPageProps {
   program: Program;
-  courses: Course[]; // nova prop
+  courses: Course[];
   onBack: () => void;
   onReport: () => void;
   onInfoRequest: (program: Program) => void;
   onNavigateToContent: (data: ContentPageData) => void;
-  onCourseSelect: (course: Course) => void; // nova prop
-  onNavigateToHub: () => void; // nova prop: usada pelo botão "Ver todos os cursos"
+  onCourseSelect: (course: Course) => void;
+  onNavigateToHub: () => void;
 }
 
 const RatingStars: React.FC<{ rating: number }> = ({ rating }) => (
@@ -39,11 +40,14 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
   onCourseSelect,
   onNavigateToHub
 }) => {
-  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false); // Estado para controlar o modal de compra
+  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
   const avgRating = program.feedbacks.reduce((acc, curr) => acc + curr.rating, 0) / (program.feedbacks.length || 1);
   const agencyCertifications = program.agency.certifications || [];
   const programVerifications = program.verifications || [];
+  
+  // Combine all active checks for display
+  const allActiveVerifications = [...agencyCertifications, ...programVerifications];
 
   // Filtra os cursos vinculados a este programa
   const programCourses = courses.filter(c => c.programId === program.id);
@@ -63,7 +67,10 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h1 className="text-4xl font-extrabold text-gray-900">{program.name}</h1>
-                <p className="mt-2 text-xl text-gray-600">Oferecido por <span className="font-bold">{program.agency.name}</span></p>
+                <div className="flex items-center mt-3 gap-3">
+                   <img src={program.agency.logo} alt={program.agency.name} className="w-10 h-10 rounded-full border border-gray-200" />
+                   <p className="text-xl text-gray-600">Oferecido por <span className="font-bold">{program.agency.name}</span></p>
+                </div>
               </div>
               {program.agency.isVerified && (
                 <div className="flex-shrink-0 ml-4">
@@ -74,21 +81,45 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
             <p className="text-lg text-gray-700 mt-4">{program.longDescription}</p>
 
             <div className="mt-8 border-t pt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">Diferenciais da Agência e Programa</h3>
+              <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h3 className="text-xl font-semibold text-gray-800">Certificação de Segurança</h3>
                 <button 
                   onClick={() => onNavigateToContent(certificationsContent)}
                   className="text-sm font-semibold text-rose-500 hover:text-rose-400 transition-colors"
                 >
-                  Saiba mais &rarr;
+                  Entenda nossos níveis &rarr;
                 </button>
               </div>
 
-              {/* Aqui podem ficar ícones / features */}
-              <ProgramFeatures features={[...agencyCertifications, ...programVerifications]} />
+              {/* Novo Selo Centralizado */}
+              <div className="flex flex-col items-center py-6 bg-gray-50 rounded-xl border border-gray-100">
+                <WomanGoSafeSeal 
+                    agencyCertifications={agencyCertifications}
+                    programVerifications={programVerifications}
+                    className="scale-125 mb-6"
+                    showDetails={true}
+                />
+                
+                {/* Ícones das Verificações Ativas */}
+                {allActiveVerifications.length > 0 ? (
+                  <div className="w-full px-6">
+                     <p className="text-center text-xs text-gray-400 uppercase tracking-widest font-semibold mb-4 border-t border-gray-200 pt-4 w-1/2 mx-auto">Itens Verificados</p>
+                     <div className="flex flex-wrap justify-center gap-4">
+                       {allActiveVerifications.map((feature) => (
+                         <div key={feature} className="flex flex-col items-center w-24 text-center">
+                            <FeatureIcon name={feature} />
+                            <span className="text-[10px] text-gray-500 mt-2 leading-tight">{feature}</span>
+                         </div>
+                       ))}
+                     </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic mt-2">Este programa atende aos requisitos básicos da plataforma.</p>
+                )}
+              </div>
             </div>
 
-            {/* Seção NOVA: Cursos relacionados a este programa */}
+            {/* Seção Cursos relacionados a este programa */}
             <div className="mt-10 border-t pt-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Cursos relacionados</h2>
@@ -105,7 +136,7 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
                       course={course} 
                       program={program} 
                       onSelect={onCourseSelect} 
-                      onProgramLinkSelect={() => {/* opcional: navegar para programa */}} 
+                      onProgramLinkSelect={() => {}} 
                     />
                   ))}
                 </div>

@@ -34,7 +34,11 @@ const AgencyDetailPage: React.FC<{
         <button onClick={onBack} className="mb-8 text-rose-500 hover:text-rose-400 font-semibold">&larr; Voltar para Agências</button>
         
         <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
-            <h1 className="text-4xl font-extrabold text-gray-900">{agency.name}</h1>
+            <div className="flex items-center gap-6 mb-4">
+                <img src={agency.logo} alt={agency.name} className="w-20 h-20 rounded-full border border-gray-100 shadow-sm" />
+                <h1 className="text-4xl font-extrabold text-gray-900">{agency.name}</h1>
+            </div>
+            
             <p className="mt-4 text-lg text-gray-600">{agency.description}</p>
              <div className="mt-6 border-t pt-6">
                 <h4 className="text-md font-semibold uppercase tracking-wide text-gray-600 mb-4">Certificações de Elite</h4>

@@ -4,6 +4,27 @@ export const certificationsContent: ContentPageData = {
   title: "Padrão Woman GO Safe",
   sections: [
     {
+      title: "Entenda os Níveis do Selo Woman GO Safe",
+      content: [
+        {
+          subtitle: "Selo Ouro",
+          text: "Nível máximo de segurança. O programa e a agência somam 95% ou mais de todas as verificações possíveis (10 itens). Excelência absoluta em suporte e prevenção."
+        },
+        {
+          subtitle: "Selo Prata",
+          text: "Alto padrão de segurança. A soma das verificações está entre 75% e 94%. Garante a maioria dos requisitos críticos de segurança e bem-estar."
+        },
+        {
+          subtitle: "Selo Bronze",
+          text: "Segurança verificada. A soma das verificações está entre 50% e 74%. O programa atende a mais da metade dos nossos rigorosos critérios."
+        },
+        {
+          subtitle: "Selo Padrão",
+          text: "Atende aos requisitos básicos da plataforma para estar listado, mas possui menos de 50% das certificações extras. Ainda seguro, mas com menos diferenciais exclusivos."
+        }
+      ]
+    },
+    {
       title: "Certificações da Agência (Confiança Institucional)",
       content: [
         {
@@ -32,10 +53,6 @@ export const certificationsContent: ContentPageData = {
       title: "Verificações do Programa (Experiência no Destino)",
       content: [
         {
-          subtitle: "Ideal para Primeira Viagem",
-          text: "Programas desenhados com suporte extra de 'boas-vindas', incluindo transfer do aeroporto, chip de celular e tour de reconhecimento da cidade."
-        },
-        {
           subtitle: "Acomodação Female-Only",
           text: "Garantia de quartos exclusivos para mulheres ou residências (homestays) onde a presença masculina foi checada e validada."
         },
@@ -48,20 +65,12 @@ export const certificationsContent: ContentPageData = {
           text: "Auditoria do trajeto entre acomodação e escola. Verificamos iluminação pública, movimento e histórico de segurança da vizinhança."
         },
         {
-          subtitle: "Acessibilidade para PCD",
-          text: "Verificação presencial de rampas, elevadores e banheiros adaptados na escola e acomodação, além de transporte público acessível."
-        },
-        {
           subtitle: "Saúde da Mulher no Local",
           text: "Mapeamento de ginecologistas e farmácias próximas com acesso facilitado a contraceptivos e itens de higiene feminina."
         },
         {
-          subtitle: "Flexibilidade de Datas e Pagamento",
-          text: "Oferece opções flexíveis para início do programa e formas de pagamento, facilitando o planejamento da intercambista."
-        },
-        {
           subtitle: "Avaliação Excepcional das Alunas",
-          text: "Este programa possui uma média de avaliação consistentemente alta, sendo um dos favoritos das nossas usuárias."
+          text: "Este selo é concedido exclusivamente a programas que mantêm uma média de avaliação igual ou superior a 4,5 estrelas pelas nossas usuárias."
         }
       ]
     }

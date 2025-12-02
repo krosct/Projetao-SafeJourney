@@ -157,18 +157,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onProgramSelect, onNavigate,
       
        {/* Feature Links Section */}
        <div className="bg-rose-500/10 py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 text-center">
-                <div className="relative bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden" onClick={() => onNavigate('map')}>
-                    <img src="https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=2531&auto=format&fit=crop" alt="Mapa mundi decorativo em uma parede de tijolos" className="absolute inset-0 w-full h-full object-cover opacity-10" />
-                    <div className="relative">
-                        <div className="flex justify-center mb-4">
-                            <MapPinIcon className="w-12 h-12 text-rose-400" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-rose-400">Mapa Interativo de Avaliações</h3>
-                        <p className="mt-2 text-gray-600">Explore destinos com base em feedbacks reais de avaliações de outras intercambistas.</p>
-                    </div>
-                </div>
-                <div className="relative bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden" onClick={() => onNavigate('hub')}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center text-center">
+                <div className="relative bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden w-full max-w-2xl" onClick={() => onNavigate('hub')}>
                     <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2670&auto=format&fit=crop" alt="Fundo de biblioteca" className="absolute inset-0 w-full h-full object-cover opacity-10" />
                     <div className="relative">
                         <div className="flex justify-center mb-4">

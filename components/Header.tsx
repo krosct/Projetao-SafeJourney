@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
   const navItems: { page: Page, label: string }[] = [
     { page: 'home', label: 'Início' },
     { page: 'programs', label: 'Programas' },
-    { page: 'map', label: 'Mapa de Avaliações' },
+    // { page: 'map', label: 'Mapa de Avaliações' }, // Removido temporariamente
     { page: 'hub', label: 'Hub de Conhecimento' },
   ];
 

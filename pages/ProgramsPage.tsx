@@ -1,7 +1,7 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Program, Agency } from '../types';
 import { ProgramCard } from '../components/ProgramCard';
-import { CERTIFICATIONS, VERIFICATIONS } from '../data/mockData';
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
 import { ArrowUpIcon } from '../components/icons/ArrowUpIcon';
 
@@ -18,10 +18,14 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedDestination, setSelectedDestination] = useState('');
   const [selectedAgency, setSelectedAgency] = useState(initialAgencyId || '');
-  const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
-  const [selectedVerifications, setSelectedVerifications] = useState<string[]>([]);
+  
+  // Novo estado para filtrar por Níveis do Selo
+  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+  
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const tiers = ['Ouro', 'Prata', 'Bronze', 'Padrão'];
 
   useEffect(() => {
     const checkScrollTop = () => {
@@ -59,26 +63,25 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
       const agencyMatch = selectedAgency
         ? p.agency.id.toString() === selectedAgency
         : true;
-      const certificationMatch = selectedCertifications.length > 0
-        ? selectedCertifications.every(cert => p.agency.certifications?.includes(cert))
-        : true;
-      const verificationMatch = selectedVerifications.length > 0
-        ? selectedVerifications.every(verif => p.verifications?.includes(verif))
+
+      // Lógica de cálculo do Tier para filtro
+      const score = (p.agency.certifications?.length || 0) + (p.verifications?.length || 0);
+      let tier = 'Padrão';
+      if (score >= 10) tier = 'Ouro';
+      else if (score >= 8) tier = 'Prata';
+      else if (score >= 5) tier = 'Bronze';
+
+      const tierMatch = selectedTiers.length > 0
+        ? selectedTiers.includes(tier)
         : true;
 
-      return queryMatch && destinationMatch && agencyMatch && certificationMatch && verificationMatch;
+      return queryMatch && destinationMatch && agencyMatch && tierMatch;
     });
-  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedCertifications, selectedVerifications]);
+  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedTiers]);
 
-  const toggleCertification = (cert: string) => {
-    setSelectedCertifications(prev =>
-      prev.includes(cert) ? prev.filter(c => c !== cert) : [...prev, cert]
-    );
-  };
-
-  const toggleVerification = (verif: string) => {
-    setSelectedVerifications(prev =>
-      prev.includes(verif) ? prev.filter(v => v !== verif) : [...prev, verif]
+  const toggleTier = (tier: string) => {
+    setSelectedTiers(prev =>
+      prev.includes(tier) ? prev.filter(t => t !== tier) : [...prev, tier]
     );
   };
   
@@ -137,45 +140,26 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
                         </button>
                     </div>
 
-                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showAdvancedFilters ? 'max-h-[500px] opacity-100 pt-4 mt-4 border-t' : 'max-h-0 opacity-0'}`}>
+                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showAdvancedFilters ? 'max-h-[300px] opacity-100 pt-4 mt-4 border-t' : 'max-h-0 opacity-0'}`}>
                         <div className="space-y-4">
-                        <div>
-                            <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Certificações da Agência:</h4>
-                            <div className="flex flex-wrap gap-2">
-                            {CERTIFICATIONS.map(cert => (
-                                <button
-                                key={cert}
-                                onClick={() => toggleCertification(cert)}
-                                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                                    selectedCertifications.includes(cert)
-                                        ? 'bg-rose-400 text-white border-[#5F9EA0]'
-                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-                                }`}
-                                >
-                                {cert}
-                                </button>
-                            ))}
+                            <div>
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Nível do Selo Woman GO Safe:</h4>
+                                <div className="flex flex-wrap gap-2">
+                                {tiers.map(tier => (
+                                    <button
+                                    key={tier}
+                                    onClick={() => toggleTier(tier)}
+                                    className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200 transform hover:scale-105 ${
+                                        selectedTiers.includes(tier)
+                                            ? 'bg-rose-500 text-white border-rose-500 shadow-md'
+                                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                    >
+                                    Selo {tier}
+                                    </button>
+                                ))}
+                                </div>
                             </div>
-                        </div>
-
-                        <div>
-                            <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Selos do Programa:</h4>
-                            <div className="flex flex-wrap gap-2">
-                            {VERIFICATIONS.map(verif => (
-                                <button
-                                key={verif}
-                                onClick={() => toggleVerification(verif)}
-                                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                                    selectedVerifications.includes(verif)
-                                        ? 'bg-[#DAA520] text-white border-[#DAA520]'
-                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-                                }`}
-                                >
-                                {verif}
-                                </button>
-                            ))}
-                            </div>
-                        </div>
                         </div>
                     </div>
                 </div>

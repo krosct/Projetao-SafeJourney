@@ -1,3 +1,4 @@
+
 export interface Feedback {
   id: number;
   author: string;
@@ -10,6 +11,7 @@ export interface Feedback {
 export interface Agency {
   id: number;
   name: string;
+  logo: string;
   isVerified: boolean;
   verificationReason?: string;
   description: string;

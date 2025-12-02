@@ -1,3 +1,5 @@
+
+
 import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from '../types';
 
 // --- CONSTANTS ---
@@ -9,15 +11,13 @@ export const CERTIFICATIONS = [
   "Parcerias Comunitárias Éticas",
 ];
 
+// Removed: "Ideal para Primeira Viagem", "Acessibilidade para PCD", "Flexibilidade de Datas e Pagamento"
+// "Avaliação Excepcional das Alunas" is now dynamic based on rating
 export const VERIFICATIONS = [
-  "Ideal para Primeira Viagem",
   "Acomodação Female-Only",
   "Imersão Cultural Profunda",
   "Vizinhança Auditada (Safe Walk)",
-  "Acessibilidade para PCD",
   "Saúde da Mulher no Local",
-  "Flexibilidade de Datas e Pagamento",
-  "Avaliação Excepcional das Alunas",
 ];
 
 // --- GENERATION HELPERS ---
@@ -92,13 +92,13 @@ const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max 
 // --- GENERATE AGENCIES (20) ---
 export const agencies: Agency[] = Array.from({ length: 20 }, (_, i) => {
     const isTopAgency = i < 5;
-    const certs = isTopAgency ? CERTIFICATIONS : getRandomSubset(CERTIFICATIONS, randomInt(0, 4));
+    const certs = isTopAgency ? CERTIFICATIONS : getRandomSubset(CERTIFICATIONS, randomInt(3, 5));
     
     return {
         id: i + 1,
         name: agencyNames[i],
+        logo: `https://loremflickr.com/200/200/business,abstract,logo/all?lock=${i + 100}`,
         isVerified: isTopAgency,
-        // isVerified: isTopAgency || Math.random() > 0.4,
         verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Woman GO Safe." : "Verificada pela Woman GO Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
         description: `Agência especializada em ${getRandom(programSubjects)} e ${getRandom(programSubjects)}.`,
         certifications: certs,
@@ -135,7 +135,7 @@ export const feedbacks: Feedback[] = Array.from({ length: 300 }, (_, i) => {
 // --- GENERATE PROGRAMS (100) ---
 let feedbackCounter = 0;
 export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
-    const isPremiumProgram = i < 10;
+    const isPremiumProgram = i < 15;
     const destination = getRandom(cities);
     const agency = isPremiumProgram ? agencies[i % 5] : getRandom(agencies); // Premium programs from top 5 agencies
     const programType = getRandom(programTypes);
@@ -147,6 +147,22 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
     feedbackCounter = (feedbackCounter + numFeedbacks);
     if (feedbackCounter >= feedbacks.length) {
         feedbackCounter = 0; // Loop back
+    }
+    
+    // Calculate Average Rating
+    const avgRating = assignedFeedbacks.length > 0
+        ? assignedFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / assignedFeedbacks.length
+        : 0;
+
+    // Base verifications from static list
+    const baseVerifications = isPremiumProgram ? VERIFICATIONS : getRandomSubset(VERIFICATIONS, randomInt(1, 4));
+    
+    // Create verifications list
+    const finalVerifications = [...baseVerifications];
+    
+    // Dynamic Logic: Add "Avaliação Excepcional" if avg >= 4.5
+    if (avgRating >= 4.5) {
+        finalVerifications.push("Avaliação Excepcional das Alunas");
     }
 
     return {
@@ -161,7 +177,7 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
         includes: getRandomSubset(includesItems, randomInt(4, 7)),
         feedbacks: assignedFeedbacks.length > 0 ? assignedFeedbacks : [feedbacks[i % feedbacks.length]],
         image: `https://picsum.photos/seed/${destination.city.replace(/\s/g, '')}${i}/800/600`,
-        verifications: isPremiumProgram ? VERIFICATIONS : getRandomSubset(VERIFICATIONS, randomInt(0, 5)),
+        verifications: finalVerifications,
     };
 });
 
