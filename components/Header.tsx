@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
     { page: 'programs', label: 'Programas' },
     // { page: 'map', label: 'Mapa de Avaliações' }, // Removido temporariamente
     { page: 'hub', label: 'Hub de Conhecimento' },
-    { page: 'about', label: 'Sobre' },
+    { page: 'about', label: 'Sobre Nós' },
   ];
 
   // Filter out nav items that might not be suitable for main menu if necessary, 

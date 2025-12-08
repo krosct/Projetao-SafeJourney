@@ -99,7 +99,7 @@ export const agencies: Agency[] = Array.from({ length: 20 }, (_, i) => {
         name: agencyNames[i],
         logo: `https://loremflickr.com/200/200/business,abstract,logo/all?lock=${i + 100}`,
         isVerified: isTopAgency,
-        verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Woman GO Safe." : "Verificada pela Woman GO Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
+        verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Women Go Safe." : "Verificada pela Women Go Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
         description: `Agência especializada em ${getRandom(programSubjects)} e ${getRandom(programSubjects)}.`,
         certifications: certs,
     };
@@ -125,7 +125,7 @@ export const feedbacks: Feedback[] = Array.from({ length: 300 }, (_, i) => {
     return {
         id: i + 1,
         author: `${getRandom(firstNames)} ${getRandom(lastNames)[0]}.`,
-        avatar: `https://loremflickr.com/150/150/woman,portrait?lock=${i}`,
+        avatar: `https://loremflickr.com/150/150/woman,women,portrait?lock=${i}`,
         rating: rating,
         comment: comment,
         date: `202${randomInt(2, 4)}-${String(randomInt(1, 12)).padStart(2, '0')}-${String(randomInt(1, 28)).padStart(2, '0')}`,
@@ -220,7 +220,7 @@ export const citySafetyData: CitySafetyData[] = uniqueCities.map((cityInfo, i) =
 });
 
 // --- KNOWLEDGE HUB COURSES ---
-const coursePartners = ["Equipe Woman GO Safe", "Global Connect Institute", "Smart Money Abroad", "Alumni Woman GO Safe", "Career Builders", "Cultural Insights Co."];
+const coursePartners = ["Equipe Women Go Safe", "Global Connect Institute", "Smart Money Abroad", "Alumni Women Go Safe", "Career Builders", "Cultural Insights Co."];
 const courseInstructors = ["Maria Reis", "Dra. Aiko Tanaka", "Chloe Davis", "Ana Pereira", "Juliana Costa", "Renata Alves", "Beatriz Lima", "Carla Martins"];
 
 const discounts = [30, 35, 40, 45, 50];
@@ -254,7 +254,7 @@ export const courses: Course[] = programs.flatMap((program, index) => {
         title: `Mentoria de Carreira em ${program.destinationCity}`,
         description: `Conecte-se com uma mentora que já viveu a experiência de intercâmbio em ${program.destinationCity} e receba conselhos práticos para alavancar sua carreira durante e após o programa.`,
         instructor: getRandom(courseInstructors),
-        partner: "Alumni Woman GO Safe",
+        partner: "Alumni Women Go Safe",
         price: Math.round(program.price * 0.1),
         programId: program.id,
         discountPercentage: getDiscount(),

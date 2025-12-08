@@ -143,7 +143,7 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
                     <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showAdvancedFilters ? 'max-h-[300px] opacity-100 pt-4 mt-4 border-t' : 'max-h-0 opacity-0'}`}>
                         <div className="space-y-4">
                             <div>
-                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Nível do Selo Woman GO Safe:</h4>
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Nível do Selo Women Go Safe:</h4>
                                 <div className="flex flex-wrap gap-2">
                                 {tiers.map(tier => (
                                     <button

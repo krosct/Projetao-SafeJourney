@@ -3,7 +3,7 @@ import React from 'react';
 import { Program } from '../types';
 import { VerifiedSeal } from './VerifiedSeal';
 import { MapPinIcon } from './icons/MapPinIcon';
-import { WomanGoSafeSeal } from './WomanGoSafeSeal';
+import { WomenGoSafeSeal } from './WomenGoSafeSeal';
 
 interface ProgramCardProps {
   program: Program;
@@ -48,7 +48,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onSelect }) =
         <p className="mt-2 text-gray-500 flex-grow">{program.shortDescription}</p>
         
         <div className="mt-auto pt-4 flex justify-center">
-            <WomanGoSafeSeal 
+            <WomenGoSafeSeal 
                 agencyCertifications={agencyCertifications}
                 programVerifications={programVerifications}
             />

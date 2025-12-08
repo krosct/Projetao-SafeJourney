@@ -114,7 +114,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                 <h3 className="font-bold text-gray-800 mb-2">2. Política de Cancelamento e Reembolso</h3>
                 <p className="mb-2">Cancelamentos feitos até 30 dias antes do embarque terão reembolso de 80%. Cancelamentos com menos de 30 dias estão sujeitos a multas contratuais.</p>
                 
-                <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Woman GO Safe</h3>
+                <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Women Go Safe</h3>
                 <p className="mb-2">Ao participar deste programa, a intercambista concorda em respeitar as leis locais e manter uma conduta que promova a segurança e o bem-estar coletivo.</p>
                 
                 <h3 className="font-bold text-gray-800 mb-2">4. Responsabilidades</h3>

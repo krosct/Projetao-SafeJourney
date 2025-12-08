@@ -2,14 +2,14 @@
 import React from 'react';
 import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
 
-interface WomanGoSafeSealProps {
+interface WomenGoSafeSealProps {
   agencyCertifications: string[];
   programVerifications: string[];
   className?: string;
   showDetails?: boolean;
 }
 
-export const WomanGoSafeSeal: React.FC<WomanGoSafeSealProps> = ({ 
+export const WomenGoSafeSeal: React.FC<WomenGoSafeSealProps> = ({ 
   agencyCertifications = [], 
   programVerifications = [],
   className = "",

@@ -93,7 +93,7 @@ export const KnowledgeHubPage: React.FC<KnowledgeHubPageProps> = ({ courses, pro
                     <div className="relative container mx-auto text-center">
                         <h1 className="text-4xl font-extrabold text-gray-900">Hub de Conhecimento</h1>
                         <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
-                            Cursos e mentorias para empoderar sua jornada. Desenvolvido pela equipe Woman GO Safe e nossos parceiros.
+                            Cursos e mentorias para empoderar sua jornada. Desenvolvido pela equipe Women Go Safe e nossos parceiros.
                         </p>
                     </div>
                     

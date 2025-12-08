@@ -157,7 +157,7 @@ const featureMap: { [key: string]: { Icon: React.FC<any>; colorClasses: string }
   "Transparência Financeira Total": { Icon: BanknotesIcon, colorClasses: 'bg-green-100 text-green-600' },
   "Selo de Diversidade e Inclusão": { Icon: UsersIcon, colorClasses: 'bg-indigo-100 text-indigo-600' },
   // Verifications
-  // "Selo Woman GO Safe Premium": { Icon: TrophyIcon, colorClasses: 'bg-amber-100 text-amber-600' },
+  // "Selo Women Go Safe Premium": { Icon: TrophyIcon, colorClasses: 'bg-amber-100 text-amber-600' },
   "Ideal para Primeira Viagem": { Icon: SparklesIcon, colorClasses: 'bg-yellow-100 text-yellow-600' },
   "Acomodação Female-Only": { Icon: KeyIcon, colorClasses: 'bg-rose-100 text-rose-600' },
   // "Foco em Liderança Feminina": { Icon: UserGroupIcon, colorClasses: 'bg-pink-100 text-pink-600' },

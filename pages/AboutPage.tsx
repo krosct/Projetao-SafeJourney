@@ -84,7 +84,7 @@ export const AboutPage: React.FC = () => {
           <div className="h-1 w-32 bg-white mb-8"></div>
           <p className="text-xl leading-relaxed max-w-4xl">
             Somos um grupo de estudantes da <span className="font-bold">Universidade Federal de Pernambuco (UFPE)</span> que 
-            desenvolveu o <span className="font-bold">SafeJourney</span> como parte da disciplina de <span className="font-bold">Projetão</span>. 
+            desenvolveu o <span className="font-bold">Women Go Safe</span> como parte da disciplina de <span className="font-bold">Projetão</span>. 
             Nossa missão é tornar viagens internacionais mais seguras e acessíveis para mulheres, combinando tecnologia, 
             pesquisa e paixão pela hospitalidade.
           </p>

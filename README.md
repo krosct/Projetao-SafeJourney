@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="components/WomanGoSafeLogo.png?v=1" alt="Logo Woman GO Safe" width="120" />
-  <img src="components/WomanGoSafeTitle.png?v=1" alt="Título Woman GO Safe" width="400" />
+  <img src="components/WomenGoSafeLogo.png?v=1" alt="Logo Women Go Safe" width="120" />
+  <img src="components/WomenGoSafeTitle.png?v=1" alt="Título Women Go Safe" width="400" />
   
   **Explore o mundo com confiança. Feito por mulheres, para mulheres.**
 
@@ -10,21 +10,21 @@
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-  [Sobre](#-sobre-o-projeto) • [Funcionalidades](#-funcionalidades) • [Tecnologias](#-tecnologias) • [Instalação](#-como-rodar-localmente) • [Estrutura](#-estrutura-do-projeto)
+  [Sobre Nós](#-sobre-o-projeto) • [Funcionalidades](#-funcionalidades) • [Tecnologias](#-tecnologias) • [Instalação](#-como-rodar-localmente) • [Estrutura](#-estrutura-do-projeto)
 </div>
 
 ---
 
 ## 🌸 Sobre o Projeto
 
-O **Woman GO Safe** é uma plataforma de agendamento de intercâmbios focada exclusivamente na segurança e empoderamento feminino. Entendemos que viajar sozinha pode ser desafiador, por isso conectamos mulheres a agências e programas rigorosamente verificados.
+O **Women Go Safe** é uma plataforma de agendamento de intercâmbios focada exclusivamente na segurança e empoderamento feminino. Entendemos que viajar sozinha pode ser desafiador, por isso conectamos mulheres a agências e programas rigorosamente verificados.
 
 Este repositório contém o **MVP (Minimum Viable Product)** da aplicação, simulando um ecossistema completo com busca de programas, avaliações de segurança baseadas em geolocalização e um hub de conhecimento.
 
 ## ✨ Funcionalidades
 
 * **🔍 Busca Inteligente de Programas:** Filtros avançados por destino, tipo de intercâmbio (curso, voluntariado, estágio) e agência.
-* **🛡️ Selo de Verificação Woman GO Safe:** Sistema visual que destaca agências com suporte 24/7, liderança feminina e acomodações seguras.
+* **🛡️ Selo de Verificação Women Go Safe:** Sistema visual que destaca agências com suporte 24/7, liderança feminina e acomodações seguras.
 * **🗺️ Mapa Interativo de Segurança:** Utilizando `Leaflet`, visualizamos cidades com classificações de segurança (Verde, Amarelo, Vermelho) baseadas em feedbacks reais de usuárias.
 * **📚 Hub de Conhecimento:** Catálogo de cursos preparatórios e mentorias para auxiliar na adaptação cultural e carreira.
 * **💬 Sistema de Avaliação e Feedback:** Transparência total com comentários e notas de quem já viajou.
@@ -112,5 +112,5 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
 ---
 <div align="center">
-  Feito com 💜 pela equipe <b>Woman GO Safe</b>
+  Feito com 💜 pela equipe <b>Women Go Safe</b>
 </div>

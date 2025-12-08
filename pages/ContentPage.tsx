@@ -2,7 +2,7 @@ import React from 'react';
 import { ContentPageData } from '../types';
 import { FeatureIcon } from '../components/FeatureIcons';
 import { certificationsContent } from '../data/contentData';
-import { WomanGoSafeSeal } from '../components/WomanGoSafeSeal';
+import { WomenGoSafeSeal } from '../components/WomenGoSafeSeal';
 
 interface ContentPageProps {
   data: ContentPageData;
@@ -41,7 +41,7 @@ export const ContentPage: React.FC<ContentPageProps> = ({ data, onBack }) => {
                     return (
                         <div key={itemIdx} className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                              <div className="mb-4 transform scale-110">
-                                <WomanGoSafeSeal 
+                                <WomenGoSafeSeal 
                                     agencyCertifications={dummyData.agency} 
                                     programVerifications={dummyData.program} 
                                 />
