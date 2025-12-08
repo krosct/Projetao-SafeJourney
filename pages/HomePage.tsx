@@ -112,7 +112,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onProgramSelect, onNavigate,
                 <span className="block text-rose-500">com Segurança e Confiança.</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
-                A Woman GO Safe é a sua plataforma para encontrar programas de intercâmbio verificados, feita por mulheres, para mulheres.
+                A Women Go Safe é a sua plataforma para encontrar programas de intercâmbio verificados, feita por mulheres, para mulheres.
             </p>
             <div className="mt-8 max-w-xl mx-auto">
                 <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleSearchSubmit}>

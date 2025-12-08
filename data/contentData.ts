@@ -1,10 +1,10 @@
 import { ContentPageData } from '../types';
 
 export const certificationsContent: ContentPageData = {
-  title: "Padrão Woman GO Safe",
+  title: "Padrão Women Go Safe",
   sections: [
     {
-      title: "Entenda os Níveis do Selo Woman GO Safe",
+      title: "Entenda os Níveis do Selo Women Go Safe",
       content: [
         {
           subtitle: "Selo Ouro",

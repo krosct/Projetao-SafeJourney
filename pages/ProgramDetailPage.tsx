@@ -5,7 +5,7 @@ import { VerifiedSeal } from '../components/VerifiedSeal';
 import { CheckmarkIcon } from '../components/icons/CheckmarkIcon';
 import { StarIcon } from '../components/icons/StarIcon';
 import { WarningIcon } from '../components/icons/WarningIcon';
-import { WomanGoSafeSeal } from '../components/WomanGoSafeSeal';
+import { WomenGoSafeSeal } from '../components/WomenGoSafeSeal';
 import { FeatureIcon } from '../components/FeatureIcons';
 import { certificationsContent } from '../data/contentData';
 import { CourseCard } from '../components/CourseCard';
@@ -93,7 +93,7 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
 
               {/* Novo Selo Centralizado */}
               <div className="flex flex-col items-center py-6 bg-gray-50 rounded-xl border border-gray-100">
-                <WomanGoSafeSeal 
+                <WomenGoSafeSeal 
                     agencyCertifications={agencyCertifications}
                     programVerifications={programVerifications}
                     className="scale-125 mb-6"
