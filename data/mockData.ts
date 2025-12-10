@@ -21,11 +21,30 @@ export const VERIFICATIONS = [
 ];
 
 // --- GENERATION HELPERS ---
-const agencyNames = [
-  "Global Sisters Exchange", "Wanderlust Women Abroad", "Athena Adventures", "Femme Forward Travels", "Empower Exchange",
-  "Sisterhood Journeys", "Galavant Girls", "ConnectHer Abroad", "The Abroad Arc", "Venture Vixens",
-  "StudySphere Internacional", "Global Horizons", "Academic Adventures", "World Class Studies", "InterConnect",
-  "Future Frontiers", "Odyssey Exchange", "Pioneer Programs", "Summit Studies", "Nexus International"
+const agenciesData = [
+  { name: "Global Sisters Exchange", logo: "/logos/Global Sisters Exchange.png" },
+  { name: "Wanderlust Women Abroad", logo: "/logos/Wanderlust Women Abroad.png" },
+  { name: "Athena Adventures", logo: "/logos/Athena Adventures.png" },
+  { name: "Femme Forward Travels", logo: "/logos/Femme Forward Travels.png" },
+  { name: "Empower Exchange", logo: "/logos/Empower Exchange.png" },
+  
+  { name: "Sisterhood Journeys", logo: "/logos/Sisterhood Journeys.png" },
+  { name: "Galavant Girls", logo: "/logos/Galavant Girls.png" },
+  { name: "ConnectHer Abroad", logo: "/logos/ConnectHer Abroad.png" },
+  { name: "The Abroad Arc", logo: "/logos/The Abroad Arc.png" },
+  { name: "Venture Vixens", logo: "/logos/Venture Vixens.png" },
+  
+  { name: "StudySphere Internacional", logo: "/logos/StudySphere Internacional.png" },
+  { name: "Global Horizons", logo: "/logos/Global Horizons.png" },
+  { name: "Academic Adventures", logo: "/logos/Academic Adventures.png" },
+  { name: "World Class Studies", logo: "/logos/World Class Studies.png" },
+  { name: "InterConnect", logo: "/logos/InterConnect.png" },
+  
+  { name: "Future Frontiers", logo: "/logos/Future Frontiers.png" },
+  { name: "Odyssey Exchange", logo: "/logos/Odyssey Exchange.png" },
+  { name: "Pioneer Programs", logo: "/logos/Pioneer Programs.png" },
+  { name: "Summit Studies", logo: "/logos/Summit Studies.png" },
+  { name: "Nexus International", logo: "/logos/Nexus International.png" },
 ];
 
 const firstNames = ["Maria", "Ana", "Sofia", "Lara", "Beatriz", "Mariana", "Júlia", "Isabella", "Laura", "Camila", "Gabriela", "Priya", "Chloe", "Aisha", "Elena", "Fernanda", "Luiza", "Valentina", "Yasmin", "Bruna"];
@@ -96,8 +115,8 @@ export const agencies: Agency[] = Array.from({ length: 20 }, (_, i) => {
     
     return {
         id: i + 1,
-        name: agencyNames[i],
-        logo: `https://loremflickr.com/200/200/business,abstract,logo/all?lock=${i + 100}`,
+        name: agenciesData[i].name,
+        logo: agenciesData[i].logo,
         isVerified: isTopAgency,
         verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Women Go Safe." : "Verificada pela Women Go Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
         description: `Agência especializada em ${getRandom(programSubjects)} e ${getRandom(programSubjects)}.`,
