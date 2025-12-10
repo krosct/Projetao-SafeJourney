@@ -69,7 +69,7 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
                 <h1 className="text-4xl font-extrabold text-gray-900">{program.name}</h1>
                 <div className="flex items-center mt-3 gap-3">
                    <img src={program.agency.logo} alt={program.agency.name} className="w-10 h-10 rounded-full border border-gray-200" />
-                   <p className="text-xl text-gray-600">Oferecido por <span className="font-bold">{program.agency.name}</span></p>
+                   <p className="text-xl text-gray-600">Oferecido por <span className="font-bold text-rose-500">{program.agency.name}</span></p>
                 </div>
               </div>
               {program.agency.isVerified && (
