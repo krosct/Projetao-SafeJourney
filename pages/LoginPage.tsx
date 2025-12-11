@@ -70,11 +70,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
         e.preventDefault();
         if (email === 'agencia@app.com.br' && password === '123456') {
              onLogin({
-                name: "Agência Exemplo",
+                name: "Global Sisters Exchange",
                 email: email,
                 avatar: "/logos/Global Sisters Exchange.png"
             });
-        } else {
+        } else if (email == "maria@womengosafe.test" && password == '123456'){
             
             onLogin({
                 name: "Maria Azevedo",

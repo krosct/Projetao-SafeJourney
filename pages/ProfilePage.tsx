@@ -242,7 +242,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
                       </div>
 
                       <div className="flex flex-col items-end gap-2">
-                        <button onClick={() => openProgramModal(p)} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Visualizar Intercâmbio</button>
+                        <button onClick={() => openProgramModal(p)} className="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700">Visualizar Intercâmbio</button>
 
                         {/* Rating UI */}
                         <div className="flex items-center gap-1 mt-2">
