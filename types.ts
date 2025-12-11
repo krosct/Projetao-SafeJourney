@@ -1,3 +1,11 @@
+export interface User {
+  name: string;
+  email: string;
+  avatar: string;
+  nationality?: string;      // ex: 'Brasil'
+  currentLocation?: string;  // ex: 'Lisboa, Portugal'
+  bio?: string;
+}
 
 export interface Feedback {
   id: number;
@@ -31,6 +39,10 @@ export interface Program {
   feedbacks: Feedback[];
   image: string;
   verifications?: string[];
+  institution?: string;   // nome da instituição (quando program.institution for usado)
+  ownerEmail?: string;    // para associar um programa a um usuário mock
+  startDate?: string;     // exemplo: '2024-02-01'
+  endDate?: string;       // exemplo: '2024-07-31'
 }
 
 export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';
