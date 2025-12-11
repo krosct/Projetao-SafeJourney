@@ -72,13 +72,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
              onLogin({
                 name: "Agência Exemplo",
                 email: email,
-                avatar: "https://i.pravatar.cc/150?u=agency"
+                avatar: "./public/logos/Global Sisters Exchange.png"
             });
         } else {
+            
             onLogin({
-                name: "Maria Silva",
-                email: "maria.silva@example.com",
-                avatar: "https://i.pravatar.cc/150?img=5"
+                name: "Maria Azevedo",
+                email: "maria.azevedo@example.com",
+                nationality: "Brasil",
+                currentLocation: "Alemanha",
+                bio: "buscando sempre objetivos maiores",
+                avatar: "./public/images/persona.png"
             });
         }
     };

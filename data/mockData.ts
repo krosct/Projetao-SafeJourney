@@ -2,6 +2,18 @@
 
 import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from '../types';
 
+// data/mockAuth.ts
+import { User } from '../types';
+
+export const MOCK_AUTH_USER: (User & { password: string }) = {
+  name: 'Maria Silva',
+  email: 'maria@safejourney.test',
+  avatar: '/public/avatar.png', // ou '/avatar.png' dependendo do path no public
+  password: '123456',
+  nationality: 'Brazil',
+  bio: 'Buscando romper barreiras além do '
+};
+
 // --- CONSTANTS ---
 export const CERTIFICATIONS = [
   "Suporte 24/7",
