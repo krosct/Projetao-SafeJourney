@@ -54,6 +54,11 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
   const avgRating = allFeedbacks.length > 0 
     ? allFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / allFeedbacks.length 
     : 0;
+  
+  // Calculate total sales
+  const totalProgramPurchases = myPrograms.reduce((acc, p) => acc + (p.purchaseCount || 0), 0);
+  const totalCoursePurchases = myCourses.reduce((acc, c) => acc + (c.purchaseCount || 0), 0);
+  const totalPurchases = totalProgramPurchases + totalCoursePurchases;
 
   // Program performance stats
   const programStats = myPrograms.map(program => {
@@ -64,7 +69,8 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
     return {
       program,
       avgRating: programAvgRating,
-      feedbackCount: programFeedbacks.length
+      feedbackCount: programFeedbacks.length,
+      purchaseCount: program.purchaseCount || 0
     };
   }).sort((a, b) => b.avgRating - a.avgRating);
 
@@ -94,7 +100,8 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       includes: (formData.get('includes') as string).split(',').map(s => s.trim()).filter(s => s !== ''),
       feedbacks: editingProgram ? editingProgram.feedbacks : [],
       image: imageUrl || (editingProgram ? editingProgram.image : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'),
-      verifications: editingProgram ? editingProgram.verifications : []
+      verifications: editingProgram ? editingProgram.verifications : [],
+      purchaseCount: editingProgram ? editingProgram.purchaseCount : 0
     };
 
     if (editingProgram) {
@@ -120,7 +127,8 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       price: Number(formData.get('price')),
       programId: Number(formData.get('programId')),
       type: formData.get('type') as 'Curso' | 'Mentoria',
-      discountPercentage: Number(formData.get('discountPercentage')) || 0
+      discountPercentage: Number(formData.get('discountPercentage')) || 0,
+      purchaseCount: editingCourse ? editingCourse.purchaseCount : 0
     };
 
     if (editingCourse) {
@@ -211,20 +219,24 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
               <div className="bg-gradient-to-br from-rose-500 to-pink-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
                   <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Total de Programas</dt>
                   <dd className="mt-2 text-5xl font-extrabold">{totalPrograms}</dd>
+                  <p className="text-xs mt-2 opacity-80">{totalProgramPurchases} vendas realizadas</p>
               </div>
               <div className="bg-gradient-to-br from-purple-500 to-indigo-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
                   <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Cursos/Mentorias</dt>
                   <dd className="mt-2 text-5xl font-extrabold">{totalCourses}</dd>
+                  <p className="text-xs mt-2 opacity-80">{totalCoursePurchases} vendas realizadas</p>
               </div>
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 overflow-hidden shadow-lg rounded-xl p-6 text-white">
                   <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Avaliação Média</dt>
                   <dd className="mt-2 text-5xl font-extrabold flex items-center">
                     {avgRating.toFixed(1)} <StarIcon className="w-8 h-8 ml-2" />
                   </dd>
+                  <p className="text-xs mt-2 opacity-80">{totalFeedbacks} avaliações</p>
               </div>
               <div className="bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
-                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Total de Feedbacks</dt>
-                  <dd className="mt-2 text-5xl font-extrabold">{totalFeedbacks}</dd>
+                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Total de Vendas</dt>
+                  <dd className="mt-2 text-5xl font-extrabold">{totalPurchases}</dd>
+                  <p className="text-xs mt-2 opacity-80">Programas + Cursos</p>
               </div>
             </div>
 
@@ -242,13 +254,14 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Programa</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Destino</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Vendas</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Avaliação</th>
                           <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Feedbacks</th>
                           <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Preço</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-100">
-                        {programStats.map(({ program, avgRating, feedbackCount }) => (
+                        {programStats.map(({ program, avgRating, feedbackCount, purchaseCount }) => (
                           <tr 
                             key={program.id} 
                             className="hover:bg-gray-50 transition-colors cursor-pointer"
@@ -262,6 +275,11 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                             </td>
                             <td className="px-6 py-4">
                               <div className="text-sm text-gray-600">{program.destinationCity}, {program.destinationCountry}</div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                {purchaseCount}
+                              </span>
                             </td>
                             <td className="px-6 py-4 text-center">
                               <div className="inline-flex items-center bg-yellow-50 px-3 py-1 rounded-full">
@@ -287,6 +305,79 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 ) : (
                   <div className="px-6 py-12 text-center text-gray-500">
                     <p>Nenhum programa cadastrado ainda.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Courses Performance */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span className="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+                Desempenho dos Cursos e Mentorias
+              </h3>
+              <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                {myCourses.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Título</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tipo</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Programa</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Vendas</th>
+                          <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Preço</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {myCourses
+                          .sort((a, b) => (b.purchaseCount || 0) - (a.purchaseCount || 0))
+                          .map((course) => {
+                            const relatedProgram = myPrograms.find(p => p.id === course.programId);
+                            return (
+                              <tr 
+                                key={course.id} 
+                                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  setViewingCourse(course);
+                                  setCourseViewModalOpen(true);
+                                }}
+                              >
+                                <td className="px-6 py-4">
+                                  <div className="text-sm font-semibold text-gray-900">{course.title}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${course.type === 'Curso' ? 'bg-rose-100 text-rose-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                    {course.type}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-xs text-gray-600">{relatedProgram?.name || 'N/A'}</div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                    🛒 {course.purchaseCount || 0}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  {course.discountPercentage && course.discountPercentage > 0 ? (
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-xs text-gray-400 line-through">${course.price}</span>
+                                      <span className="text-sm font-bold text-rose-600">${Math.round(course.price * (1 - course.discountPercentage / 100))}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm font-bold text-gray-900">${course.price}</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="px-6 py-12 text-center text-gray-500">
+                    <p>Nenhum curso ou mentoria cadastrado ainda.</p>
                   </div>
                 )}
               </div>
@@ -594,6 +685,12 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                     <span className="font-semibold text-gray-700">Preço:</span>
                     <span className="font-bold text-rose-600 text-2xl">${viewingProgram.price}</span>
                 </div>
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
+                    <span className="font-semibold text-gray-700">Total de Vendas:</span>
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-base font-bold bg-green-100 text-green-800">
+                      {viewingProgram.purchaseCount || 0}
+                    </span>
+                </div>
 
                 <div>
                     <h3 className="font-bold text-gray-800 mb-2">Descrição Completa</h3>
@@ -848,7 +945,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
             </div>
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-4 gap-4 mb-8">
               <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-100">
                 <p className="text-xs font-semibold text-gray-600 uppercase">Avaliação Média</p>
                 <div className="flex items-center mt-2">
@@ -869,6 +966,12 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 <p className="text-xs font-semibold text-gray-600 uppercase">Recomendações</p>
                 <p className="text-3xl font-bold text-green-700 mt-2">
                   {selectedProgramForFeedbacks.feedbacks.filter(f => f.rating >= 4).length}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-100">
+                <p className="text-xs font-semibold text-gray-600 uppercase">Total de Vendas</p>
+                <p className="text-3xl font-bold text-purple-700 mt-2">
+                  {selectedProgramForFeedbacks.purchaseCount || 0}
                 </p>
               </div>
             </div>
@@ -957,6 +1060,13 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                             <span className="font-bold text-rose-600 text-2xl">${viewingCourse.price}</span>
                         )}
                     </div>
+                </div>
+                
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
+                    <span className="font-semibold text-gray-700">Total de Vendas:</span>
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-base font-bold bg-green-100 text-green-800">
+                      {viewingCourse.purchaseCount || 0}
+                    </span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

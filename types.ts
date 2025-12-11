@@ -31,6 +31,7 @@ export interface Program {
   feedbacks: Feedback[];
   image: string;
   verifications?: string[];
+  purchaseCount?: number;
 }
 
 export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';
@@ -56,6 +57,7 @@ export interface Course {
   programId: number;
   type: 'Curso' | 'Mentoria';
   discountPercentage?: number;
+  purchaseCount?: number;
 }
 
 export interface User {

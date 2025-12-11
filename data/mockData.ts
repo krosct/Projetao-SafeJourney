@@ -197,6 +197,7 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
         feedbacks: assignedFeedbacks.length > 0 ? assignedFeedbacks : [feedbacks[i % feedbacks.length]],
         image: `https://picsum.photos/seed/${destination.city.replace(/\s/g, '')}${i}/800/600`,
         verifications: finalVerifications,
+        purchaseCount: randomInt(5, 150),
     };
 });
 
@@ -265,6 +266,7 @@ export const courses: Course[] = programs.flatMap((program, index) => {
         price: Math.round(program.price * 0.1),
         programId: program.id,
         discountPercentage: getDiscount(),
+        purchaseCount: randomInt(3, 80),
     };
 
     const mentorship: Course = {
@@ -277,6 +279,7 @@ export const courses: Course[] = programs.flatMap((program, index) => {
         price: Math.round(program.price * 0.1),
         programId: program.id,
         discountPercentage: getDiscount(),
+        purchaseCount: randomInt(2, 50),
     };
 
     return [course, mentorship];
