@@ -72,17 +72,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
              onLogin({
                 name: "Agência Exemplo",
                 email: email,
-                avatar: "./public/logos/Global Sisters Exchange.png"
+                avatar: "/logos/Global Sisters Exchange.png"
             });
         } else {
             
             onLogin({
                 name: "Maria Azevedo",
-                email: "maria.azevedo@example.com",
+                email: "maria@womengosafe.test",
                 nationality: "Brasil",
                 currentLocation: "Alemanha",
                 bio: "buscando sempre objetivos maiores",
-                avatar: "./public/images/persona.png"
+                avatar: "public/images/persona.png"
             });
         }
     };
