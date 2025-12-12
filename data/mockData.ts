@@ -187,7 +187,6 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
         includes: getRandomSubset(includesItems, randomInt(4, 7)),
         feedbacks: assignedFeedbacks.length > 0 ? assignedFeedbacks : [feedbacks[i % feedbacks.length]],
         image: `https://picsum.photos/seed/${destination.city.replace(/\s/g, '')}${i}/800/600`,
-        verifications: finalVerifications,
         purchaseCount: randomInt(5, 150),
     };
 });
