@@ -82,12 +82,12 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
 
             <div className="mt-8 border-t pt-6">
               <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h3 className="text-xl font-semibold text-gray-800">Certificação de Segurança</h3>
+                <h3 className="text-xl font-semibold text-gray-800">Certificações</h3>
                 <button 
                   onClick={() => onNavigateToContent(certificationsContent)}
                   className="text-sm font-semibold text-rose-500 hover:text-rose-400 transition-colors"
                 >
-                  Entenda nossos níveis &rarr;
+                  Entenda nossos selos &rarr;
                 </button>
               </div>
 
@@ -99,23 +99,7 @@ export const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({
                     className="scale-125 mb-6"
                     showDetails={true}
                 />
-                
-                {/* Ícones das Verificações Ativas */}
-                {allActiveVerifications.length > 0 ? (
-                  <div className="w-full px-6">
-                     <p className="text-center text-xs text-gray-400 uppercase tracking-widest font-semibold mb-4 border-t border-gray-200 pt-4 w-1/2 mx-auto">Itens Verificados</p>
-                     <div className="flex flex-wrap justify-center gap-4">
-                       {allActiveVerifications.map((feature) => (
-                         <div key={feature} className="flex flex-col items-center w-24 text-center">
-                            <FeatureIcon name={feature} />
-                            <span className="text-[10px] text-gray-500 mt-2 leading-tight">{feature}</span>
-                         </div>
-                       ))}
-                     </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 italic mt-2">Este programa atende aos requisitos básicos da plataforma.</p>
-                )}
+                {/* Seção 'Itens Verificados' removida conforme solicitado */}
               </div>
             </div>
 
