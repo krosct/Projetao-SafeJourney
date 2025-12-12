@@ -5,19 +5,11 @@ import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from 
 // --- CONSTANTS ---
 export const CERTIFICATIONS = [
   "Suporte 24/7",
-  "Selo de Diversidade e Inclusão",
-  "Treinamento Pré-Partida Abrangente",
-  "Transparência Financeira Total",
-  "Parcerias Comunitárias Éticas",
+  "Female-Only",
+  "Women's Health",
 ];
 
-// Removed: "Ideal para Primeira Viagem", "Acessibilidade para PCD", "Flexibilidade de Datas e Pagamento"
-// "Avaliação Excepcional das Alunas" is now dynamic based on rating
 export const VERIFICATIONS = [
-  "Acomodação Female-Only",
-  "Imersão Cultural Profunda",
-  "Vizinhança Auditada (Safe Walk)",
-  "Saúde da Mulher no Local",
 ];
 
 // --- GENERATION HELPERS ---
@@ -107,20 +99,36 @@ const includesItems = ["Mensalidades", "Acomodação Verificada", "Atividades Cu
 const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 const getRandomSubset = (arr: any[], n: number) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+// Função auxiliar para embaralhar array
+const shuffle = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
 
 // --- GENERATE AGENCIES (20) ---
 export const agencies: Agency[] = Array.from({ length: 20 }, (_, i) => {
-    const isTopAgency = i < 5;
-    const certs = isTopAgency ? CERTIFICATIONS : getRandomSubset(CERTIFICATIONS, randomInt(3, 5));
+    // 40% (8 agências) terão os 3 selos
+    const isFullSealed = i < 8; 
+    
+    let agencysCerts: string[] = [];
+
+    if (isFullSealed) {
+        // Recebe todos os 3
+        agencysCerts = [...CERTIFICATIONS];
+    } else {
+        // Recebe uma combinação de 1 ou 2 selos (não os 3)
+        // 60% chance de ter 2 selos, 40% chance de ter 1 selo
+        const numCerts = Math.random() > 0.4 ? 2 : 1;
+        agencysCerts = shuffle(CERTIFICATIONS).slice(0, numCerts);
+    }
     
     return {
         id: i + 1,
         name: agenciesData[i].name,
         logo: agenciesData[i].logo,
-        isVerified: isTopAgency,
-        verificationReason: isTopAgency ? "Verificada por excelência em segurança, suporte e transparência, cumprindo todos os rigorosos critérios da Women Go Safe." : "Verificada pela Women Go Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
+        isVerified: isFullSealed,
+        verificationReason: isFullSealed 
+            ? "Verificada por possuir o ciclo completo de segurança: Suporte, Exclusividade e Saúde." 
+            : "Verificada pela Women Go Safe por bom histórico de feedback e compromisso com a segurança das alunas.",
         description: `Agência especializada em ${getRandom(programSubjects)} e ${getRandom(programSubjects)}.`,
-        certifications: certs,
+        certifications: agencysCerts,
     };
 });
 
@@ -154,9 +162,8 @@ export const feedbacks: Feedback[] = Array.from({ length: 300 }, (_, i) => {
 // --- GENERATE PROGRAMS (100) ---
 let feedbackCounter = 0;
 export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
-    const isPremiumProgram = i < 15;
     const destination = getRandom(cities);
-    const agency = isPremiumProgram ? agencies[i % 5] : getRandom(agencies); // Premium programs from top 5 agencies
+    const agency = getRandom(agencies); 
     const programType = getRandom(programTypes);
     const programSubject = getRandom(programSubjects);
 
@@ -166,22 +173,6 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
     feedbackCounter = (feedbackCounter + numFeedbacks);
     if (feedbackCounter >= feedbacks.length) {
         feedbackCounter = 0; // Loop back
-    }
-    
-    // Calculate Average Rating
-    const avgRating = assignedFeedbacks.length > 0
-        ? assignedFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / assignedFeedbacks.length
-        : 0;
-
-    // Base verifications from static list
-    const baseVerifications = isPremiumProgram ? VERIFICATIONS : getRandomSubset(VERIFICATIONS, randomInt(1, 4));
-    
-    // Create verifications list
-    const finalVerifications = [...baseVerifications];
-    
-    // Dynamic Logic: Add "Avaliação Excepcional" if avg >= 4.5
-    if (avgRating >= 4.5) {
-        finalVerifications.push("Avaliação Excepcional das Alunas");
     }
 
     return {
@@ -196,7 +187,7 @@ export const programs: Program[] = Array.from({ length: 100 }, (_, i) => {
         includes: getRandomSubset(includesItems, randomInt(4, 7)),
         feedbacks: assignedFeedbacks.length > 0 ? assignedFeedbacks : [feedbacks[i % feedbacks.length]],
         image: `https://picsum.photos/seed/${destination.city.replace(/\s/g, '')}${i}/800/600`,
-        verifications: finalVerifications,
+        // A propriedade 'verifications' foi removida daqui.
     };
 });
 
