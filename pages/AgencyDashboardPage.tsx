@@ -356,7 +356,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                                 </td>
                                 <td className="px-6 py-4 text-center">
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    🛒 {course.purchaseCount || 0}
+                                    {course.purchaseCount || 0}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
@@ -945,7 +945,7 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
             </div>
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-100">
                 <p className="text-xs font-semibold text-gray-600 uppercase">Avaliação Média</p>
                 <div className="flex items-center mt-2">
@@ -962,15 +962,9 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 <p className="text-xs font-semibold text-gray-600 uppercase">Total de Feedbacks</p>
                 <p className="text-3xl font-bold text-blue-700 mt-2">{selectedProgramForFeedbacks.feedbacks.length}</p>
               </div>
-              <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-lg border border-green-100">
-                <p className="text-xs font-semibold text-gray-600 uppercase">Recomendações</p>
-                <p className="text-3xl font-bold text-green-700 mt-2">
-                  {selectedProgramForFeedbacks.feedbacks.filter(f => f.rating >= 4).length}
-                </p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-100">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100">
                 <p className="text-xs font-semibold text-gray-600 uppercase">Total de Vendas</p>
-                <p className="text-3xl font-bold text-purple-700 mt-2">
+                <p className="text-3xl font-bold text-green-700 mt-2">
                   {selectedProgramForFeedbacks.purchaseCount || 0}
                 </p>
               </div>
