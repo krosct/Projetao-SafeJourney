@@ -5,6 +5,14 @@ export interface User {
   nationality?: string;      // ex: 'Brasil'
   currentLocation?: string;  // ex: 'Lisboa, Portugal'
   bio?: string;
+  preferredDestination?: string;  // ex: 'Tóquio, Japão'
+  emergencyContactName?: string;
+  emergencyContactPhone?: string; // ex: '+55 11 98888-7777'
+  // NOVOS CAMPOS ADICIONADOS
+  contactPhone?: string; // ex: '+49 151 1234 5678'
+  currentAddress?: string; // ex: 'Musterstraße 5, 10117 Berlin, Deutschland'
+  professionalArea?: string;
+  medicalConditions?: string;
 }
 
 export interface Feedback {

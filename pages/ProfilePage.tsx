@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { User, Program } from '../types';
 import { programs as allPrograms } from '../data/mockData';
+import { StarIcon } from '../components/icons/StarIcon'; // Importado para uso no JSX
 
 interface ProfilePageProps {
   currentUser: User | null;
@@ -25,6 +26,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
   const [editNationality, setEditNationality] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [editBio, setEditBio] = useState('');
+  
+  // CAMPOS ADICIONAIS
+  const [editPreferredDestination, setEditPreferredDestination] = useState('');
+  const [editEmergencyContactName, setEditEmergencyContactName] = useState('');
+  const [editEmergencyContactPhone, setEditEmergencyContactPhone] = useState('');
+  const [editContactPhone, setEditContactPhone] = useState(''); 
+  const [editCurrentAddress, setEditCurrentAddress] = useState(''); 
+  const [editProfessionalArea, setEditProfessionalArea] = useState(''); // NOVO
+  const [editMedicalConditions, setEditMedicalConditions] = useState(''); // NOVO
+
 
   // Program modal state
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
@@ -63,8 +74,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
   };
 
   // Seleção dos programas para o histórico:
-  // - tentar achar 1 programa para Alemanha (destCountry includes 'alemanha' or 'germany' or city 'berlim')
-  // - e 1 programa de país diferente
   const getSelectedPrograms = (): Program[] => {
     if (!allPrograms || allPrograms.length === 0) return [];
 
@@ -111,6 +120,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
     setEditNationality(currentUser.nationality || '');
     setEditLocation(currentUser.currentLocation || '');
     setEditBio(currentUser.bio || '');
+    
+    // Inicializa todos os 7 campos adicionais
+    setEditPreferredDestination(currentUser.preferredDestination || '');
+    setEditEmergencyContactName(currentUser.emergencyContactName || '');
+    setEditEmergencyContactPhone(currentUser.emergencyContactPhone || '');
+    setEditContactPhone(currentUser.contactPhone || '');
+    setEditCurrentAddress(currentUser.currentAddress || '');
+    setEditProfessionalArea(currentUser.professionalArea || '');
+    setEditMedicalConditions(currentUser.medicalConditions || '');
+    
     setEditOpen(true);
   };
 
@@ -123,6 +142,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
       nationality: editNationality,
       currentLocation: editLocation,
       bio: editBio,
+      // Salva todos os 7 campos adicionais
+      preferredDestination: editPreferredDestination,
+      emergencyContactName: editEmergencyContactName,
+      emergencyContactPhone: editEmergencyContactPhone,
+      contactPhone: editContactPhone,
+      currentAddress: editCurrentAddress,
+      professionalArea: editProfessionalArea,
+      medicalConditions: editMedicalConditions,
     };
     onUpdateUser(updated);
     setEditOpen(false);
@@ -149,26 +176,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
   return (
     <div className="bg-gray-50 min-h-[calc(100vh-80px)]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={onBack} className="text-rose-500 hover:text-rose-400 font-semibold">&larr; Voltar</button>
-          <div>
-            <button onClick={openEdit} className="px-4 py-2 bg-rose-500 text-white rounded-md shadow hover:bg-rose-600">Editar perfil</button>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow mb-8">
-          <div className="flex items-center gap-6">
-            <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 rounded-lg object-cover shadow-sm" />
-            <div>
-              <h2 className="text-2xl font-extrabold text-gray-900">{currentUser.name}</h2>
-              <p className="text-sm text-gray-600">{currentUser.email}</p>
-              <div className="mt-3 text-gray-700">
-                <p><strong>Nacionalidade:</strong> {currentUser.nationality || '-'}</p>
-                <p><strong>Local atual:</strong> {currentUser.currentLocation || '-'}</p>
-              </div>
+        
+        {/* Dashboard Header - Estrutura similar ao Painel da Agência */}
+        <div className="bg-white p-6 rounded-xl shadow mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border border-gray-100">
+            <div className="flex items-center gap-6">
+                <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 rounded-full object-cover shadow-sm border-4 border-rose-50" />
+                <div>
+                    <h1 className="text-3xl font-extrabold text-gray-900">{currentUser.name}</h1>
+                    <p className="text-base text-gray-600 mt-1">{currentUser.email}</p>
+                </div>
             </div>
-          </div>
+            <div className="flex flex-col items-start md:items-end gap-3">
+                <button onClick={openEdit} className="px-5 py-2 bg-rose-500 text-white rounded-md shadow hover:bg-rose-600 font-semibold transition-colors">
+                    Editar perfil
+                </button>
+                <button onClick={onBack} className="text-rose-500 hover:text-rose-400 font-semibold flex items-center">
+                   &larr; Voltar
+                </button>
+            </div>
         </div>
+        {/* FIM Dashboard Header */}
 
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-8">
@@ -189,31 +216,81 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
           </nav>
         </div>
 
-        {/* Perfil */}
+        {/* Perfil Content (Refatorado para o novo template) */}
         {activeTab === 'profile' && (
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Sobre</h3>
-            <p className="text-gray-700 leading-relaxed">
-              {currentUser.bio || 'Sem bio disponível.'}
-            </p>
+          <div className="space-y-6">
+            
+            {/* Seção Sobre/Bio */}
+            <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3 border-b pb-2">Sobre</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {currentUser.bio || 'Sem bio disponível. Clique em editar para adicionar.'}
+              </p>
+            </div>
 
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <h4 className="text-sm font-semibold text-gray-600">Informações</h4>
-                <p className="mt-2 text-gray-700"><strong>Nome:</strong> {currentUser.name}</p>
-                <p className="text-gray-700"><strong>Email:</strong> {currentUser.email}</p>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <h4 className="text-sm font-semibold text-gray-600">Localização</h4>
-                <p className="mt-2 text-gray-700"><strong>Nacionalidade:</strong> {currentUser.nationality || '-'}</p>
-                <p className="text-gray-700"><strong>Local atual:</strong> {currentUser.currentLocation || '-'}</p>
-              </div>
+            {/* Seção Detalhes, Contato e Endereço (usando grid como no dashboard) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 {/* Informações Pessoais e Profissionais */}
+                 <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Detalhes Pessoais</h3>
+                    <dl className="space-y-3 text-gray-700">
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Nacionalidade:</dt>
+                            <dd className="font-semibold">{currentUser.nationality || '-'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Telefone Pessoal:</dt>
+                            <dd className="font-semibold">{currentUser.contactPhone || '-'}</dd>
+                        </div>
+                        {/* NOVO CAMPO: Área Profissional */}
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Área Profissional:</dt>
+                            <dd className="font-semibold">{currentUser.professionalArea || '-'}</dd>
+                        </div>
+                        {/* Campo: Destino Preferido */}
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Destino preferido:</dt>
+                            <dd className="font-semibold">{currentUser.preferredDestination || '-'}</dd>
+                        </div>
+                    </dl>
+                 </div>
+                 
+                 {/* Localização e Segurança */}
+                 <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Localização e Segurança</h3>
+                    <dl className="space-y-3 text-gray-700">
+                         <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Local atual:</dt>
+                            <dd className="font-semibold">{currentUser.currentLocation || '-'}</dd>
+                        </div>
+                        {/* NOVO CAMPO: Condições Médicas */}
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-gray-600">Condições Médicas:</dt>
+                            <dd className="font-semibold text-red-500">{currentUser.medicalConditions || 'Nenhuma informada.'}</dd>
+                        </div>
+                         {/* Endereço Atual */}
+                        <div className="flex flex-col mb-4 pt-3 border-t border-gray-100">
+                            <dt className="font-medium text-gray-600">Endereço de Acomodação Atual:</dt>
+                            <dd className="font-semibold mt-1 bg-gray-50 p-2 rounded-md border border-gray-100 text-sm break-words">
+                                {currentUser.currentAddress || 'Endereço não informado. Por favor, adicione.'}
+                            </dd>
+                        </div>
+                         {/* Campos de Contato de Emergência */}
+                        <div className="flex justify-between pt-3 border-t border-gray-100">
+                            <dt className="font-medium text-red-500">Emergência (Nome):</dt>
+                            <dd className="font-semibold">{currentUser.emergencyContactName || '-'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                            <dt className="font-medium text-red-500">Emergência (Telefone):</dt>
+                            <dd className="font-semibold">{currentUser.emergencyContactPhone || '-'}</dd>
+                        </div>
+                    </dl>
+                 </div>
             </div>
           </div>
         )}
 
-        {/* Histórico */}
+        {/* Histórico Content (Permanece Inalterado) */}
         {activeTab === 'history' && (
           <div>
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Histórico de Programas e Cursos</h3>
@@ -258,9 +335,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
                                   className={`w-7 h-7 flex items-center justify-center rounded ${filled ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400`}
                                   aria-label={`Avaliar ${st} estrela`}
                                 >
-                                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.384 2.455a1 1 0 00-.364 1.118l1.286 3.966c.3.921-.755 1.688-1.54 1.118L10 15.347l-3.813 2.403c-.785.57-1.84-.197-1.54-1.118l1.286-3.966a1 1 0 00-.364-1.118L2.186 9.393c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.966z"/>
-                                  </svg>
+                                  <StarIcon className="w-5 h-5" />
                                 </button>
                               );
                             })}
@@ -278,24 +353,71 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
         )}
       </div>
 
-      {/* Edit Profile Modal */}
+      {/* Edit Profile Modal (Atualizado com todos os 7 campos) */}
       {isEditOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[3000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Editar perfil</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[3000] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-gray-900 border-b pb-3">Editar perfil</h3>
             <form onSubmit={saveProfile} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nome</label>
-                <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+              
+              {/* Informações Pessoais */}
+              <div className="space-y-4 border-b pb-4 border-gray-100">
+                  <h4 className="font-bold text-gray-800">Informações Pessoais</h4>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700">Nome</label>
+                      <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+                  </div>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700">Nacionalidade</label>
+                      <input value={editNationality} onChange={e => setEditNationality(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+                  </div>
+                   <div>
+                    <label className="block text-sm font-medium text-gray-700">Telefone Pessoal</label>
+                    <input value={editContactPhone} onChange={e => setEditContactPhone(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: +49 151 1234 5678" />
+                  </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nacionalidade</label>
-                <input value={editNationality} onChange={e => setEditNationality(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+              
+              {/* Informações de Viagem e Carreira */}
+              <div className="pt-4 border-b pb-4 border-gray-100 space-y-4">
+                  <h4 className="font-bold text-gray-800">Viagem e Carreira</h4>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700">Local atual (Cidade, País)</label>
+                      <input value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Destino Preferido</label>
+                    <input value={editPreferredDestination} onChange={e => setEditPreferredDestination(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: Tóquio, Japão" />
+                  </div>
+                   {/* NOVO CAMPO: Área Profissional */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Área Profissional</label>
+                    <input value={editProfessionalArea} onChange={e => setEditProfessionalArea(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: Ciência da Computação, Marketing" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Endereço de Acomodação Atual</label>
+                    <textarea value={editCurrentAddress} onChange={e => setEditCurrentAddress(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={2} placeholder="Rua, Número, CEP, Cidade, País." />
+                  </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Local atual</label>
-                <input value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
+
+              {/* Saúde e Emergência */}
+              <div className="pt-4 border-b pb-4 border-gray-100 space-y-4">
+                <h4 className="font-bold text-red-600 mb-2">Saúde e Emergência</h4>
+                 {/* NOVO CAMPO: Condições Médicas */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Condições Médicas / Alergias (Opcional)</label>
+                  <textarea value={editMedicalConditions} onChange={e => setEditMedicalConditions(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={2} placeholder="Ex: Diabetes Tipo 1, Alergia a Penicilina. (Para uso em caso de emergência)." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nome do Contato de Emergência</label>
+                  <input value={editEmergencyContactName} onChange={e => setEditEmergencyContactName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Nome Completo" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Telefone do Contato de Emergência</label>
+                  <input value={editEmergencyContactPhone} onChange={e => setEditEmergencyContactPhone(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: +55 11 99999-8888" />
+                </div>
               </div>
+
+              {/* Bio */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Bio</label>
                 <textarea value={editBio} onChange={e => setEditBio(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={3} />
@@ -310,7 +432,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
         </div>
       )}
 
-      {/* Program View Modal */}
+      {/* Program View Modal (Permanece inalterado) */}
       {isProgramModalOpen && selectedProgram && (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-[3000] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">

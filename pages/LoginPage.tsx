@@ -74,7 +74,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
                 email: email,
                 avatar: "/logos/Global Sisters Exchange.png"
             });
-        } else if (email == "maria@womengosafe.test" && password == '123456'){
+        } else if (email == "maria@app.com.br" && password == '123456'){
             
             onLogin({
                 name: "Maria Azevedo",
@@ -82,7 +82,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
                 nationality: "Brasil",
                 currentLocation: "Alemanha",
                 bio: "buscando sempre objetivos maiores",
-                avatar: "public/images/persona.png"
+                avatar: "public/images/persona.png", 
+                emergencyContactName: "+55 (81) 998426421",
+                emergencyContactPhone: "Liliana Ferreira",
+                contactPhone: "+55 (81) 992310927",
+                currentAddress: "Unter den Linden, 32 - Berlim, Alemanha",
+                professionalArea: 'Design',
+                medicalConditions: 'Nenhuma conhecida.',
             });
         }
     };

@@ -6,14 +6,25 @@ import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from 
 import { User } from '../types';
 
 export const MOCK_AUTH_USER: (User & { password: string }) = {
-  name: 'Maria Silva',
+  name: 'Maria Azevedo',
   email: 'maria@womengosafe.test',
-  avatar: '/public/images/persona.png', // ou '/avatar.png' dependendo do path no public
+  avatar: '/public/images/persona.png', 
   password: '123456',
-  nationality: 'Brazil',
-  bio: 'Buscando romper barreiras além do '
+  nationality: 'Brasil',
+  currentLocation: 'Berlim, Alemanha',
+  bio: 'Estudante de intercâmbio entusiasmada com a cultura e tecnologia, buscando sempre novos desafios e objetivos maiores.',
+  
+  // Campos Adicionais
+  preferredDestination: 'Tóquio, Japão',
+  emergencyContactName: 'João da Silva (Irmão)',
+  emergencyContactPhone: '+55 11 98888-7777',
+  contactPhone: '+49 151 1234 5678',
+  currentAddress: 'Musterstraße 5, 10117 Berlin, Deutschland',
+  
+  // NOVOS CAMPOS ADICIONADOS
+  professionalArea: 'Tecnologia e Design',
+  medicalConditions: 'Nenhuma conhecida.',
 };
-
 // --- CONSTANTS ---
 export const CERTIFICATIONS = [
   "Suporte 24/7",
