@@ -70,15 +70,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
         e.preventDefault();
         if (email === 'agencia@app.com.br' && password === '123456') {
              onLogin({
-                name: "Agência Exemplo",
+                name: "Global Sisters Exchange",
                 email: email,
-                avatar: "https://i.pravatar.cc/150?u=agency"
+                avatar: "/logos/Global Sisters Exchange.png"
             });
-        } else {
+        } else if (email == "maria@app.com.br" && password == '123456'){
+            
             onLogin({
-                name: "Maria Silva",
-                email: "maria.silva@example.com",
-                avatar: "https://i.pravatar.cc/150?img=5"
+                name: "Maria Azevedo",
+                email: "maria@app.com.br",
+                nationality: "Brasil",
+                currentLocation: "Alemanha",
+                bio: "Buscando sempre objetivos maiores e aprender sobre culturas novas.",
+                avatar: "/images/persona.png", 
+                emergencyContactName: "+55 (81) 998426421",
+                emergencyContactPhone: "Liliana Ferreira",
+                contactPhone: "+55 (81) 992310927",
+                currentAddress: "Unter den Linden, 32 - Berlim, Alemanha",
+                professionalArea: 'Design',
+                medicalConditions: 'Nenhuma conhecida.',
             });
         }
     };

@@ -1,0 +1,1513 @@
+diff --git a/App.tsx b/App.tsx
+index 24d33ce..10ff035 100644
+--- a/App.tsx
++++ b/App.tsx
+@@ -1,5 +1,5 @@
+ 
+-import React, { useState, useCallback } from 'react';
++import React, { useState, useCallback, useEffect} from 'react';
+ import { Page, Program, Agency, Course, User, ContentPageData } from './types';
+ import { Header } from './components/Header';
+ import { Footer } from './components/Footer';
+@@ -17,9 +17,11 @@ import { CourseDetailPage } from './pages/CourseDetailPage';
+ import { LoginPage } from './pages/LoginPage';
+ import { InfoRequestModal } from './components/InfoRequestModal';
+ import { AboutPage } from './pages/AboutPage';
+-
+-
+ import { AgencyDashboardPage } from './pages/AgencyDashboardPage';
++import { ProfilePage } from './pages/ProfilePage';
++import { HistoryPage } from './pages/HistoryPage';
++import { MOCK_AUTH_USER } from './data/mockData';
++
+ 
+ const AgencyDetailPage: React.FC<{
+   agency: Agency;
+@@ -85,6 +87,19 @@ const App: React.FC = () => {
+   const [contentPageData, setContentPageData] = useState<ContentPageData | null>(null);
+   const [history, setHistory] = useState<Page[]>(['home']);
+   const [currentUser, setCurrentUser] = useState<User | null>(null);
++    // Persistência simples: restaura usuário salvo no localStorage (se houver)
++  useEffect(() => {
++    try {
++      const raw = localStorage.getItem('sj_user');
++      if (raw) {
++        const parsed = JSON.parse(raw) as User;
++        setCurrentUser(parsed);
++      }
++    } catch (err) {
++      // ignore parse erros
++      console.warn('Não foi possível restaurar usuário do localStorage', err);
++    }
++  }, []);
+ 
+   const [isInfoModalOpen, setInfoModalOpen] = useState(false);
+   const [infoRequestProgram, setInfoRequestProgram] = useState<Program | null>(null);
+@@ -95,8 +110,17 @@ const App: React.FC = () => {
+     window.scrollTo(0, 0);
+   }, []);
+ 
+-  const handleLogin = (user: User) => {
++  
++
++    const handleLogin = (user: User) => {
+     setCurrentUser(user);
++    // salva usuário no localStorage para persistência entre reloads
++    try {
++      localStorage.setItem('sj_user', JSON.stringify(user));
++    } catch (err) {
++      console.warn('Falha ao salvar usuário no localStorage', err);
++    }
++
+     if (user.email === 'agencia@app.com.br') {
+       navigate('agencyDashboard');
+     } else {
+@@ -106,9 +130,23 @@ const App: React.FC = () => {
+ 
+   const handleLogout = () => {
+     setCurrentUser(null);
++    try {
++      localStorage.removeItem('sj_user');
++    } catch (err) {
++      console.warn('Falha ao remover usuário do localStorage', err);
++    }
+     navigate('home');
+   };
+ 
++  const handleUpdateUser = (updatedUser: User) => {
++    setCurrentUser(updatedUser);
++    try {
++      localStorage.setItem('sj_user', JSON.stringify(updatedUser));
++    } catch (err) {
++      console.warn('Falha ao salvar usuário atualizado no localStorage', err);
++    }
++  };
++
+   // CRUD Operations for Agency Dashboard
+   const handleUpdateProgram = (updatedProgram: Program) => {
+     setAllPrograms(prev => prev.map(p => p.id === updatedProgram.id ? updatedProgram : p));
+@@ -270,6 +308,13 @@ const App: React.FC = () => {
+         />;
+       case 'login':
+         return <LoginPage onBack={() => navigate('home')} onLogin={handleLogin} />;
++      
++      case 'profile':
++        return <ProfilePage currentUser={currentUser} onBack={handleBack} onUpdateUser={handleUpdateUser} />;
++
++      case 'history':
++        return <HistoryPage currentUser={currentUser} onBack={handleBack} />;
++
+       case 'home':
+       default:
+         return <HomePage onProgramSelect={handleProgramSelect} onNavigate={handleNavigate} onSearch={handleSearch} />;
+diff --git a/components/Header.tsx b/components/Header.tsx
+index 2e2f5e1..d76328c 100644
+--- a/components/Header.tsx
++++ b/components/Header.tsx
+@@ -1,33 +1,41 @@
+-
+ import React, { useState } from 'react';
+ import { Logo } from './Logo';
+ import { User, Page } from '../types';
+ 
+ interface HeaderProps {
+-    onNavigate: (page: Page) => void;
+-    activePage: Page;
+-    currentUser: User | null;
+-    onLogout: () => void;
++  onNavigate: (page: Page) => void;
++  activePage: Page;
++  currentUser: User | null;
++  onLogout: () => void;
+ }
+ 
+ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentUser, onLogout }) => {
+   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+ 
+-  const navItems: { page: Page, label: string }[] = [
++  const navItems: { page: Page; label: string }[] = [
+     { page: 'home', label: 'Início' },
+     { page: 'programs', label: 'Programas' },
+-    // { page: 'map', label: 'Mapa de Avaliações' }, // Removido temporariamente
+     { page: 'hub', label: 'Hub de Conhecimento' },
+     { page: 'about', label: 'Sobre Nós' },
+   ];
+ 
+-  // Filter out nav items that might not be suitable for main menu if necessary, 
+-  // but here we just stick to the 4 main ones.
+-
+   const baseClasses = "relative px-1 py-2 text-md font-medium transition-colors duration-300 ease-in-out group";
+   const inactiveClasses = "text-gray-600 hover:text-rose-500";
+   const activeClasses = "text-rose-500";
+ 
++  // Clique no avatar: agencia -> agencyDashboard ; usuária -> profile ; sem user -> login
++  const handleAvatarClick = () => {
++    if (!currentUser) {
++      onNavigate('login');
++      return;
++    }
++    if (currentUser.email === 'agencia@app.com.br') {
++      onNavigate('agencyDashboard');
++    } else {
++      onNavigate('profile');
++    }
++  };
++
+   return (
+     <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-[2000]">
+       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
+@@ -35,12 +43,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
+           <div className="flex-shrink-0 cursor-pointer" onClick={() => onNavigate('home')}>
+             <Logo />
+           </div>
++
+           <div className="hidden md:flex items-center">
+             <div className="flex items-baseline space-x-8">
+               {navItems.map(item => (
+-                <button 
++                <button
+                   key={item.page}
+-                  onClick={() => onNavigate(item.page)} 
++                  onClick={() => onNavigate(item.page)}
+                   className={`${baseClasses} ${activePage === item.page ? activeClasses : inactiveClasses}`}
+                 >
+                   <span>{item.label}</span>
+@@ -48,46 +57,58 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
+                 </button>
+               ))}
+             </div>
++
+             <div className="ml-12">
+-                {currentUser ? (
+-                  <div className="flex items-center gap-4">
+-                    <div 
+-                        onClick={() => currentUser.email === 'agencia@app.com.br' && onNavigate('agencyDashboard')}
+-                        className={`flex items-center gap-2 ${currentUser.email === 'agencia@app.com.br' ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+-                        title={currentUser.email === 'agencia@app.com.br' ? "Ir para o Painel da Agência" : "Perfil"}
+-                    >
+-                        <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm"/>
+-                    </div>
+-                    <button
+-                        onClick={onLogout}
+-                        className="px-5 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+-                    >
+-                        Sair
+-                    </button>
++              {currentUser ? (
++                <div className="flex items-center gap-4">
++                  <div
++                    onClick={handleAvatarClick}
++                    className="flex items-center gap-2 cursor-pointer select-none"
++                    title={currentUser.email === 'agencia@app.com.br' ? 'Ir para o Painel da Agência' : 'Ver meu perfil'}
++                    role="button"
++                    aria-label="Abrir perfil"
++                  >
++                    <img
++                      src={currentUser.avatar}
++                      alt={currentUser.name}
++                      className="w-10 h-10 rounded-full object-cover shadow-sm"
++                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://i.pravatar.cc/150?u=placeholder'; }}
++                    />
++                    <span className="hidden md:block font-medium text-gray-700">{currentUser.name}</span>
+                   </div>
+-                ) : (
++
+                   <button
+-                      onClick={() => onNavigate('login')}
+-                      className="px-5 py-2 bg-rose-400 text-white font-semibold rounded-md shadow-md hover:bg-cyan-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
++                    onClick={onLogout}
++                    className="px-5 py-2 bg-rose-600 text-white font-semibold rounded-md shadow-md hover:bg-rose-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300"
+                   >
+-                      Entrar
++                    Sair
+                   </button>
+-                )}
++                </div>
++              ) : (
++                <button
++                  onClick={() => onNavigate('login')}
++                  className="px-5 py-2 bg-rose-400 text-white font-semibold rounded-md shadow-md hover:bg-rose-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300"
++                >
++                  Entrar
++                </button>
++              )}
+             </div>
+           </div>
++
++          {/* Mobile trigger */}
+           <div className="-mr-2 flex md:hidden">
+             <button
+               onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+               type="button"
+-              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
++              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300"
+               aria-controls="mobile-menu"
+-              aria-expanded="false"
++              aria-expanded={isMobileMenuOpen}
+             >
+               <span className="sr-only">Abrir menu principal</span>
+               {isMobileMenuOpen ? (
+-                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+-                 </svg>
++                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
++                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
++                </svg>
+               ) : (
+                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+@@ -96,61 +117,66 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
+             </button>
+           </div>
+         </div>
+-      </nav>
+-      {isMobileMenuOpen && (
+-        <div className="md:hidden" id="mobile-menu">
++
++        {/* Mobile menu items */}
++        {isMobileMenuOpen && (
++          <div className="md:hidden" id="mobile-menu">
+             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+-            {navItems.map(item => (
++              {navItems.map(item => (
+                 <button
+-                key={item.page}
+-                onClick={() => {
+-                    onNavigate(item.page);
+-                    setMobileMenuOpen(false);
+-                }}
+-                className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium ${activePage === item.page ? 'bg-rose-500 text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
++                  key={item.page}
++                  onClick={() => { onNavigate(item.page); setMobileMenuOpen(false); }}
++                  className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium ${activePage === item.page ? 'bg-rose-500 text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+                 >
+-                {item.label}
++                  {item.label}
+                 </button>
+-            ))}
+-             <div className="border-t my-2"></div>
++              ))}
++
++              <div className="border-t my-2" />
++
+               {currentUser ? (
+                 <div className="pt-2 pb-1 space-y-2">
+-                    <div 
+-                        className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+-                        onClick={() => {
+-                            if (currentUser.email === 'agencia@app.com.br') {
+-                                onNavigate('agencyDashboard');
+-                                setMobileMenuOpen(false);
+-                            }
+-                        }}
+-                    >
+-                        <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover"/>
+-                        <span className="font-medium text-gray-800">{currentUser.name}</span>
+-                    </div>
+-                    <button
+-                        onClick={() => {
+-                            onLogout();
+-                            setMobileMenuOpen(false);
+-                        }}
+-                        className="w-full text-center block px-3 py-2 rounded-md text-base font-medium bg-red-600 text-white hover:bg-red-700"
+-                    >
+-                        Sair
+-                    </button>
++                  <div
++                    className="flex items-center gap-3 px-3 py-2 cursor-pointer"
++                    onClick={() => {
++                      if (currentUser.email === 'agencia@app.com.br') {
++                        onNavigate('agencyDashboard');
++                      } else {
++                        onNavigate('profile');
++                      }
++                      setMobileMenuOpen(false);
++                    }}
++                  >
++                    <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover"/>
++                    <span className="font-medium text-gray-800">{currentUser.name}</span>
++                  </div>
++
++                  <button
++                    onClick={() => { onNavigate('history'); setMobileMenuOpen(false); }}
++                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium"
++                  >
++                    Histórico
++                  </button>
++
++                  <button
++                    onClick={() => { onLogout(); setMobileMenuOpen(false); }}
++                    className="w-full text-center block px-3 py-2 rounded-md text-base font-medium bg-rose-600 text-white hover:bg-rose-700"
++                  >
++                    Sair
++                  </button>
+                 </div>
+               ) : (
+                 <button
+-                  onClick={() => {
+-                      onNavigate('login');
+-                      setMobileMenuOpen(false);
+-                  }}
+-                  className="w-full text-center block px-3 py-2 rounded-md text-base font-medium bg-rose-400 text-white hover:bg-cyan-700"
++                  onClick={() => { onNavigate('login'); setMobileMenuOpen(false); }}
++                  className="w-full text-center block px-3 py-2 rounded-md text-base font-medium bg-rose-400 text-white hover:bg-rose-500"
+                 >
+                   Entrar
+                 </button>
+               )}
+             </div>
+-        </div>
+-      )}
++          </div>
++        )}
++      </nav>
+     </header>
+   );
+-};
++};
+\ No newline at end of file
+diff --git a/components/PurchaseModal.tsx b/components/PurchaseModal.tsx
+index 9380fde..c1140d2 100644
+--- a/components/PurchaseModal.tsx
++++ b/components/PurchaseModal.tsx
+@@ -1,38 +1,22 @@
++
+ import React, { useState, useEffect } from 'react';
+-import { Program, User, Course } from '../types';
++import { Program, User } from '../types';
+ import { CheckmarkIcon } from './icons/CheckmarkIcon';
+ import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
+ 
+ interface PurchaseModalProps {
+   isOpen: boolean;
+   onClose: () => void;
+-  program?: Program; // Tornou-se opcional
+-  course?: Course;   // Novo campo opcional
+-  coursePrice?: number; // Preço calculado do curso (com desconto)
+-  agencyName?: string; // Nome da agência (necessário para cursos)
++  program: Program;
+   currentUser: User | null;
+ }
+ 
+ type Step = 'terms' | 'payment' | 'processing' | 'success';
+ 
+-export const PurchaseModal: React.FC<PurchaseModalProps> = ({ 
+-  isOpen, 
+-  onClose, 
+-  program, 
+-  course, 
+-  coursePrice,
+-  agencyName,
+-  currentUser 
+-}) => {
++export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, program, currentUser }) => {
+   const [step, setStep] = useState<Step>('terms');
+   const [acceptedTerms, setAcceptedTerms] = useState(false);
+   
+-  // Define se estamos comprando um curso ou programa
+-  const isCourse = !!course;
+-  const itemTitle = isCourse ? course?.title : program?.name;
+-  const itemPrice = isCourse ? coursePrice : program?.price;
+-  const providerName = isCourse ? agencyName : program?.agency.name;
+-
+   // Payment Form State
+   const [cardName, setCardName] = useState('');
+   const [cardNumber, setCardNumber] = useState('');
+@@ -43,6 +27,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+     if (isOpen) {
+       setStep('terms');
+       setAcceptedTerms(false);
++      // Alteração solicitada: Iniciar vazio ao invés de usar currentUser.name (que era 'Visitante')
+       setCardName('');
+       setCardNumber('');
+       setExpiry('');
+@@ -76,12 +61,27 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+ 
+   return (
+     <div className="fixed inset-0 bg-black bg-opacity-70 z-[3000] flex justify-center items-center p-4 backdrop-blur-sm">
++       {/* CSS Local para forçar scrollbar clara */}
+        <style>{`
+-        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+-        .custom-scrollbar::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 6px; }
+-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 6px; border: 2px solid #f3f4f6; }
+-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
+-        .force-light-scheme { color-scheme: light; }
++        .custom-scrollbar::-webkit-scrollbar {
++          width: 10px;
++        }
++        .custom-scrollbar::-webkit-scrollbar-track {
++          background: #f3f4f6; /* cinza bem claro */
++          border-radius: 6px;
++        }
++        .custom-scrollbar::-webkit-scrollbar-thumb {
++          background-color: #d1d5db; /* cinza médio */
++          border-radius: 6px;
++          border: 2px solid #f3f4f6;
++        }
++        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
++          background-color: #9ca3af;
++        }
++        /* Forçar esquema de cor clara para controles nativos neste componente */
++        .force-light-scheme {
++          color-scheme: light;
++        }
+       `}</style>
+ 
+       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] force-light-scheme">
+@@ -89,7 +89,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+         {/* Header */}
+         <div className="bg-rose-50 p-4 border-b border-rose-100 flex justify-between items-center">
+           <h2 className="text-lg font-bold text-gray-800">
+-            {step === 'terms' && (isCourse ? 'Termos do Curso' : 'Termos do Programa')}
++            {step === 'terms' && 'Termos do Programa'}
+             {step === 'payment' && 'Pagamento Seguro'}
+             {step === 'processing' && 'Processando...'}
+             {step === 'success' && 'Compra Confirmada'}
+@@ -108,37 +108,17 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+           {step === 'terms' && (
+             <div className="space-y-4">
+               <div className="bg-white p-4 rounded-lg border border-gray-200 text-sm text-gray-600 h-64 overflow-y-auto custom-scrollbar shadow-inner">
+-                {isCourse ? (
+-                  // TERMOS ESPECÍFICOS PARA CURSO
+-                  <>
+-                    <h3 className="font-bold text-gray-800 mb-2">1. Acesso ao Conteúdo</h3>
+-                    <p className="mb-2">O curso <strong>{itemTitle}</strong> será disponibilizado imediatamente após a confirmação do pagamento no Hub de Conhecimento.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">2. Certificação</h3>
+-                    <p className="mb-2">Após a conclusão de todas as aulas e atividades, um certificado digital será emitido em nome da aluna.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">3. Propriedade Intelectual</h3>
+-                    <p className="mb-2">O material didático é de uso pessoal e intransferível, sendo proibida sua reprodução ou compartilhamento sem autorização.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">4. Garantia</h3>
+-                    <p>Oferecemos garantia de satisfação de 7 dias. Caso o conteúdo não atenda às expectativas, o reembolso integral pode ser solicitado neste período.</p>
+-                  </>
+-                ) : (
+-                  // TERMOS ORIGINAIS DO PROGRAMA
+-                  <>
+-                    <h3 className="font-bold text-gray-800 mb-2">1. Condições Gerais de Segurança</h3>
+-                    <p className="mb-2">A agência <strong>{providerName}</strong> compromete-se a fornecer acomodação verificada (female-only) e suporte local 24/7 conforme descrito no pacote.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">2. Política de Cancelamento e Reembolso</h3>
+-                    <p className="mb-2">Cancelamentos feitos até 30 dias antes do embarque terão reembolso de 80%. Cancelamentos com menos de 30 dias estão sujeitos a multas contratuais.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Women Go Safe</h3>
+-                    <p className="mb-2">Ao participar deste programa, a intercambista concorda em respeitar as leis locais e manter uma conduta que promova a segurança e o bem-estar coletivo.</p>
+-                    
+-                    <h3 className="font-bold text-gray-800 mb-2">4. Responsabilidades</h3>
+-                    <p>A plataforma atua como intermediadora. A execução dos serviços é de responsabilidade integral da agência contratada.</p>
+-                  </>
+-                )}
++                <h3 className="font-bold text-gray-800 mb-2">1. Condições Gerais de Segurança</h3>
++                <p className="mb-2">A agência <strong>{program.agency.name}</strong> compromete-se a fornecer acomodação verificada (female-only) e suporte local 24/7 conforme descrito no pacote.</p>
++                
++                <h3 className="font-bold text-gray-800 mb-2">2. Política de Cancelamento e Reembolso</h3>
++                <p className="mb-2">Cancelamentos feitos até 30 dias antes do embarque terão reembolso de 80%. Cancelamentos com menos de 30 dias estão sujeitos a multas contratuais.</p>
++                
++                <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Women Go Safe</h3>
++                <p className="mb-2">Ao participar deste programa, a intercambista concorda em respeitar as leis locais e manter uma conduta que promova a segurança e o bem-estar coletivo.</p>
++                
++                <h3 className="font-bold text-gray-800 mb-2">4. Responsabilidades</h3>
++                <p>A plataforma atua como intermediadora. A execução dos serviços é de responsabilidade integral da agência contratada.</p>
+               </div>
+ 
+               <div className="flex items-start">
+@@ -153,7 +133,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+                 </div>
+                 <div className="ml-3 text-sm">
+                   <label htmlFor="terms" className="font-medium text-gray-700 cursor-pointer">
+-                    Li e concordo com os termos e condições do {isCourse ? 'curso' : 'programa'}.
++                    Li e concordo com os termos e condições do programa.
+                   </label>
+                 </div>
+               </div>
+@@ -176,7 +156,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+               <div className="bg-rose-50 p-4 rounded-lg flex justify-between items-center">
+                 <div>
+                   <p className="text-sm text-gray-500">Total a pagar</p>
+-                  <p className="text-2xl font-bold text-gray-800">${itemPrice}</p>
++                  <p className="text-2xl font-bold text-gray-800">${program.price}</p>
+                 </div>
+                 <ShieldCheckIcon className="w-8 h-8 text-rose-400" />
+               </div>
+@@ -242,7 +222,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+                 type="submit"
+                 className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 shadow-md transition-transform transform active:scale-95"
+               >
+-                Pagar ${itemPrice}
++                Pagar ${program.price}
+               </button>
+             </form>
+           )}
+@@ -263,23 +243,14 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+               </div>
+               <h2 className="text-3xl font-extrabold text-gray-800 mb-2">Compra Realizada!</h2>
+               <p className="text-gray-600 mb-6">
+-                {isCourse 
+-                  ? <>Você agora tem acesso ilimitado ao curso <strong>{itemTitle}</strong>.</>
+-                  : <>Parabéns! Sua vaga no programa <strong>{itemTitle}</strong> está garantida.</>
+-                }
++                Parabéns! Sua vaga no programa <strong>{program.name}</strong> está garantida.
+               </p>
+               <div className="bg-gray-50 p-4 rounded-lg mb-6 text-sm text-left border border-gray-100">
+                 <p className="mb-2"><strong>Próximos passos:</strong></p>
+                 <ul className="list-disc pl-5 space-y-1 text-gray-600">
+-                  <li>Enviamos um e-mail com o comprovante.</li>
+-                  {isCourse ? (
+-                     <li>Acesse o "Hub de Conhecimento" para iniciar suas aulas agora mesmo.</li>
+-                  ) : (
+-                    <>
+-                      <li>A agência entrará em contato em até 24h úteis.</li>
+-                      <li>Acesse o "Hub de Conhecimento" para iniciar seus cursos bônus.</li>
+-                    </>
+-                  )}
++                  <li>Enviamos um e-mail com o comprovante e contrato.</li>
++                  <li>A agência entrará em contato em até 24h úteis.</li>
++                  <li>Acesse o "Hub de Conhecimento" para iniciar seus cursos bônus.</li>
+                 </ul>
+               </div>
+               <button
+@@ -294,4 +265,4 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({
+       </div>
+     </div>
+   );
+-};
+\ No newline at end of file
++};
+diff --git a/data/mockData.ts b/data/mockData.ts
+index 59c94de..2bc4543 100644
+--- a/data/mockData.ts
++++ b/data/mockData.ts
+@@ -2,6 +2,29 @@
+ 
+ import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from '../types';
+ 
++// data/mockAuth.ts
++import { User } from '../types';
++
++export const MOCK_AUTH_USER: (User & { password: string }) = {
++  name: 'Maria Azevedo',
++  email: 'maria@womengosafe.test',
++  avatar: '/public/images/persona.png', 
++  password: '123456',
++  nationality: 'Brasil',
++  currentLocation: 'Berlim, Alemanha',
++  bio: 'Estudante de intercâmbio entusiasmada com a cultura e tecnologia, buscando sempre novos desafios e objetivos maiores.',
++  
++  // Campos Adicionais
++  preferredDestination: 'Tóquio, Japão',
++  emergencyContactName: 'João da Silva (Irmão)',
++  emergencyContactPhone: '+55 11 98888-7777',
++  contactPhone: '+49 151 1234 5678',
++  currentAddress: 'Musterstraße 5, 10117 Berlin, Deutschland',
++  
++  // NOVOS CAMPOS ADICIONADOS
++  professionalArea: 'Tecnologia e Design',
++  medicalConditions: 'Nenhuma conhecida.',
++};
+ // --- CONSTANTS ---
+ export const CERTIFICATIONS = [
+   "Suporte 24/7",
+@@ -47,7 +70,7 @@ const positiveComments = [
+   "Recomendo de olhos fechados! O suporte local foi incrível e as amizades que fiz levarei para a vida.",
+   "O programa foi perfeitamente organizado. A acomodação era ótima e as aulas muito enriquecedoras. Uma jornada inesquecível.",
+   "A melhor decisão que já tomei! A equipe foi super atenciosa e me ajudou com cada detalhe. Me senti muito empoderada.",
+-  "Simplesmente perfeito. As mentorias e os cursos me deixaram muito confiante para viajar sozinha."
++  "Simplesmente perfeito. O treinamento pré-partida me deixou muito confiante para viajar sozinha."
+ ];
+ const neutralComments = [
+   "Foi uma boa experiência no geral. O programa acadêmico era forte, mas a organização de eventos sociais poderia ser melhor.",
+@@ -94,7 +117,7 @@ const cities = [
+     { city: "Queenstown", country: "Nova Zelândia", coords: { lat: -45.0312, lng: 168.6626 } }
+ ];
+ 
+-const includesItems = ["Acomodação Verificada", "Atividades Culturais", "Suporte Local 24/7", "Seguro Viagem", "Material do Curso", "Passe de Transporte Público", "Workshop de Segurança", "Sessão de Mentoria", "Kit de Boas-vindas"];
++const includesItems = ["Mensalidades", "Acomodação Verificada", "Atividades Culturais", "Suporte Local 24/7", "Seguro Viagem", "Material do Curso", "Passe de Transporte Público", "Workshop de Segurança", "Sessão de Mentoria", "Kit de Boas-vindas"];
+ 
+ const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+ const getRandomSubset = (arr: any[], n: number) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);
+diff --git a/pages/CourseDetailPage.tsx b/pages/CourseDetailPage.tsx
+index 2a3402e..7bfa56d 100644
+--- a/pages/CourseDetailPage.tsx
++++ b/pages/CourseDetailPage.tsx
+@@ -1,7 +1,7 @@
+-import React, { useState } from 'react';
++import React from 'react';
+ import { Course, Program } from '../types';
+ import { CheckmarkIcon } from '../components/icons/CheckmarkIcon';
+-import { PurchaseModal } from '../components/PurchaseModal'; // Importado
++import { TagIcon } from '../components/icons/TagIcon';
+ 
+ interface CourseDetailPageProps {
+   course: Course;
+@@ -18,6 +18,7 @@ const generatePhotoSeeds = (course: Course, program: Program): string[] => {
+ 
+     let theme = 'study'; // Tema padrão
+ 
++    // Mapeamento de palavras-chave para temas de imagem
+     if (title.includes('cultura') || title.includes('língua')) theme = 'culture';
+     else if (title.includes('carreira') || title.includes('negócios') || title.includes('business')) theme = 'business';
+     else if (title.includes('design') || title.includes('artes') || title.includes('fotografia')) theme = 'art';
+@@ -26,22 +27,21 @@ const generatePhotoSeeds = (course: Course, program: Program): string[] => {
+     else if (title.includes('aventura')) theme = 'adventure';
+     else if (course.type === 'Mentoria') theme = 'mentoring';
+ 
++    // Cria 5 sementes únicas para a galeria
+     for (let i = 1; i <= 5; i++) {
+         seeds.push(`${city}-${theme}-${i}`);
+     }
+     return seeds;
+ };
+ 
++
+ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, relatedProgram, onBack, onViewAgencyPrograms }) => {
+-  const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false); // Estado do modal
+   const agency = relatedProgram.agency;
+   const photoSeeds = generatePhotoSeeds(course, relatedProgram);
+ 
+   const hasDiscount = course.discountPercentage && course.discountPercentage > 0;
+   const finalPrice = hasDiscount ? Math.round(course.price * (1 - course.discountPercentage! / 100)) : course.price;
+ 
+-  // Mock de usuário atual
+-  const mockUser = { name: 'Visitante', email: '', avatar: '' };
+ 
+   return (
+     <div className="bg-white">
+@@ -76,22 +76,11 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, rela
+                 ) : (
+                     <span className="text-5xl font-extrabold text-gray-900">${course.price}</span>
+                 )}
+-                <p className="mt-2 text-gray-600 mb-6">
++                <p className="mt-2 text-gray-600">
+                     {hasDiscount && course.discountPercentage === 100
+                         ? `Este ${course.type.toLowerCase()} é seu ao contratar o programa de intercâmbio relacionado!`
+                         : `Aproveite este desconto especial por tempo limitado.`}
+                 </p>
+-
+-                {/* BOTÃO DE COMPRA ADICIONADO AQUI */}
+-                <button 
+-                  onClick={() => setPurchaseModalOpen(true)}
+-                  className="w-full sm:w-auto bg-emerald-600 text-white font-bold py-4 px-8 rounded-lg shadow-lg hover:bg-emerald-700 transition-all transform hover:scale-[1.02] flex justify-center items-center gap-2"
+-                >
+-                  <span>Comprar {course.type} Agora</span>
+-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+-                  </svg>
+-                </button>
+             </div>
+           </div>
+ 
+@@ -137,16 +126,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({ course, rela
+             </div>
+         </div>
+       </div>
+-
+-      {/* MODAL ADICIONADO AQUI */}
+-      <PurchaseModal 
+-        isOpen={isPurchaseModalOpen}
+-        onClose={() => setPurchaseModalOpen(false)}
+-        course={course}
+-        coursePrice={finalPrice}
+-        agencyName={agency.name}
+-        currentUser={mockUser}
+-      />
+     </div>
+   );
+ };
+\ No newline at end of file
+diff --git a/pages/HistoryPage.tsx b/pages/HistoryPage.tsx
+new file mode 100644
+index 0000000..b4ef9f1
+--- /dev/null
++++ b/pages/HistoryPage.tsx
+@@ -0,0 +1,62 @@
++// novo: pages/HistoryPage.tsx
++import React from 'react';
++import { User } from '../types';
++
++const MOCK_PROGRAMS = [
++  {
++    id: 'p1',
++    title: 'Intercâmbio Acadêmico - Universidade de Lisboa',
++    institution: 'Universidade de Lisboa',
++    country: 'Portugal',
++    city: 'Lisboa',
++    startDate: '2024-02-01',
++    endDate: '2024-07-31',
++    description: 'Semestre de intercambio focado em Sociologia.',
++  },
++  {
++    id: 'p2',
++    title: 'Curso de Português Avançado',
++    institution: 'Escola Lingua',
++    country: 'Portugal',
++    city: 'Lisboa',
++    startDate: '2024-03-01',
++    endDate: '2024-06-01',
++    description: 'Curso intensivo de português para estrangeiros.',
++  }
++];
++
++export const HistoryPage: React.FC<{ currentUser: User | null; onBack: () => void }> = ({ currentUser, onBack }) => {
++  if (!currentUser) {
++    return (
++      <div className="container mx-auto px-4 py-12">
++        <p className="text-center text-gray-600">Você precisa entrar para ver o histórico.</p>
++      </div>
++    );
++  }
++
++  return (
++    <div className="container mx-auto px-4 py-12 max-w-4xl">
++      <button onClick={onBack} className="text-rose-500 hover:text-rose-400 mb-6">&larr; Voltar</button>
++      <h2 className="text-2xl font-bold mb-4">Histórico de Programas e Cursos</h2>
++
++      <div className="space-y-4">
++        {MOCK_PROGRAMS.map(p => (
++          <div key={p.id} className="bg-white p-4 rounded-lg shadow">
++            <div className="flex justify-between">
++              <div>
++                <h3 className="font-semibold">{p.title}</h3>
++                <p className="text-sm text-gray-600">{p.institution} — {p.city}, {p.country}</p>
++              </div>
++              <div className="text-sm text-gray-500">
++                {p.startDate} → {p.endDate}
++              </div>
++            </div>
++            <p className="mt-2 text-gray-700">{p.description}</p>
++          </div>
++        ))}
++      </div>
++    </div>
++  );
++};
++
++export default HistoryPage;
+\ No newline at end of file
+diff --git a/pages/LoginPage.tsx b/pages/LoginPage.tsx
+index 098832c..83e826f 100644
+--- a/pages/LoginPage.tsx
++++ b/pages/LoginPage.tsx
+@@ -70,15 +70,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
+         e.preventDefault();
+         if (email === 'agencia@app.com.br' && password === '123456') {
+              onLogin({
+-                name: "Agência Exemplo",
++                name: "Global Sisters Exchange",
+                 email: email,
+-                avatar: "https://i.pravatar.cc/150?u=agency"
++                avatar: "/logos/Global Sisters Exchange.png"
+             });
+-        } else {
++        } else if (email == "maria@app.com.br" && password == '123456'){
++            
+             onLogin({
+-                name: "Maria Silva",
+-                email: "maria.silva@example.com",
+-                avatar: "https://i.pravatar.cc/150?img=5"
++                name: "Maria Azevedo",
++                email: "maria@womengosafe.test",
++                nationality: "Brasil",
++                currentLocation: "Alemanha",
++                bio: "buscando sempre objetivos maiores",
++                avatar: "public/images/persona.png", 
++                emergencyContactName: "+55 (81) 998426421",
++                emergencyContactPhone: "Liliana Ferreira",
++                contactPhone: "+55 (81) 992310927",
++                currentAddress: "Unter den Linden, 32 - Berlim, Alemanha",
++                professionalArea: 'Design',
++                medicalConditions: 'Nenhuma conhecida.',
+             });
+         }
+     };
+diff --git a/pages/ProfilePage.tsx b/pages/ProfilePage.tsx
+new file mode 100644
+index 0000000..958619f
+--- /dev/null
++++ b/pages/ProfilePage.tsx
+@@ -0,0 +1,483 @@
++import React, { useEffect, useState } from 'react';
++import { User, Program } from '../types';
++import { programs as allPrograms } from '../data/mockData';
++import { StarIcon } from '../components/icons/StarIcon'; // Importado para uso no JSX
++
++interface ProfilePageProps {
++  currentUser: User | null;
++  onBack: () => void;
++  onUpdateUser: (u: User) => void;
++}
++
++/**
++ * ProfilePage
++ * - Abas: Perfil / Histórico
++ * - Edita perfil (modal) e persiste via onUpdateUser (App salva em localStorage)
++ * - Histórico mostra apenas 2 programas: 1 para Alemanha (se existir) + 1 de outro país
++ * - Botão "Visualizar Intercâmbio" abre modal com detalhes do programa
++ * - Avaliação local (1..5) salva em localStorage por usuário+program (apenas demonstração)
++ */
++export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, onUpdateUser }) => {
++  const [activeTab, setActiveTab] = useState<'profile' | 'history'>('profile');
++
++  // Edit profile state
++  const [isEditOpen, setEditOpen] = useState(false);
++  const [editName, setEditName] = useState('');
++  const [editNationality, setEditNationality] = useState('');
++  const [editLocation, setEditLocation] = useState('');
++  const [editBio, setEditBio] = useState('');
++  
++  // CAMPOS ADICIONAIS
++  const [editPreferredDestination, setEditPreferredDestination] = useState('');
++  const [editEmergencyContactName, setEditEmergencyContactName] = useState('');
++  const [editEmergencyContactPhone, setEditEmergencyContactPhone] = useState('');
++  const [editContactPhone, setEditContactPhone] = useState(''); 
++  const [editCurrentAddress, setEditCurrentAddress] = useState(''); 
++  const [editProfessionalArea, setEditProfessionalArea] = useState(''); // NOVO
++  const [editMedicalConditions, setEditMedicalConditions] = useState(''); // NOVO
++
++
++  // Program modal state
++  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
++  const [isProgramModalOpen, setProgramModalOpen] = useState(false);
++
++  // Ratings map: programId -> rating
++  const [ratings, setRatings] = useState<Record<number, number>>({});
++
++  // Load ratings from localStorage for currentUser
++  useEffect(() => {
++    if (!currentUser) {
++      setRatings({});
++      return;
++    }
++    const map: Record<number, number> = {};
++    (allPrograms || []).forEach((p) => {
++      const key = `sj_rating_${currentUser.email}_${p.id}`;
++      const raw = localStorage.getItem(key);
++      if (raw) {
++        const v = parseInt(raw, 10);
++        if (!isNaN(v)) map[p.id] = v;
++      }
++    });
++    setRatings(map);
++  }, [currentUser]);
++
++  const setRating = (programId: number, value: number) => {
++    if (!currentUser) return;
++    const key = `sj_rating_${currentUser.email}_${programId}`;
++    try {
++      localStorage.setItem(key, String(value));
++    } catch (err) {
++      console.warn('Falha ao salvar rating', err);
++    }
++    setRatings((prev) => ({ ...prev, [programId]: value }));
++  };
++
++  // Seleção dos programas para o histórico:
++  const getSelectedPrograms = (): Program[] => {
++    if (!allPrograms || allPrograms.length === 0) return [];
++
++    const normalize = (s?: string) => (s || '').toLowerCase();
++
++    const germanyProgram = allPrograms.find(p =>
++      normalize(p.destinationCountry).includes('aleman') ||
++      normalize(p.destinationCountry).includes('germany') ||
++      normalize(p.destinationCity).includes('berlim')
++    );
++
++    const otherProgram = allPrograms.find(p =>
++      p !== germanyProgram &&
++      !(
++        normalize(p.destinationCountry).includes('aleman') ||
++        normalize(p.destinationCountry).includes('germany') ||
++        normalize(p.destinationCity).includes('berlim')
++      )
++    );
++
++    const selected: Program[] = [];
++    if (germanyProgram) selected.push(germanyProgram);
++    if (otherProgram) selected.push(otherProgram);
++
++    // Fallbacks:
++    if (selected.length === 0) {
++      // pega os dois primeiros
++      return allPrograms.slice(0, 2);
++    }
++    if (selected.length === 1) {
++      // tentou achar Alemanha, mas não encontrou outro país diferente: pega o próximo disponível que não seja o mesmo
++      const fallback = allPrograms.find(p => p !== selected[0]);
++      if (fallback) selected.push(fallback);
++    }
++    return selected;
++  };
++
++  const userPrograms: Program[] = getSelectedPrograms();
++
++  // Abrir edição com dados preenchidos
++  const openEdit = () => {
++    if (!currentUser) return;
++    setEditName(currentUser.name || '');
++    setEditNationality(currentUser.nationality || '');
++    setEditLocation(currentUser.currentLocation || '');
++    setEditBio(currentUser.bio || '');
++    
++    // Inicializa todos os 7 campos adicionais
++    setEditPreferredDestination(currentUser.preferredDestination || '');
++    setEditEmergencyContactName(currentUser.emergencyContactName || '');
++    setEditEmergencyContactPhone(currentUser.emergencyContactPhone || '');
++    setEditContactPhone(currentUser.contactPhone || '');
++    setEditCurrentAddress(currentUser.currentAddress || '');
++    setEditProfessionalArea(currentUser.professionalArea || '');
++    setEditMedicalConditions(currentUser.medicalConditions || '');
++    
++    setEditOpen(true);
++  };
++
++  const saveProfile = (e?: React.FormEvent) => {
++    if (e) e.preventDefault();
++    if (!currentUser) return;
++    const updated: User = {
++      ...currentUser,
++      name: editName,
++      nationality: editNationality,
++      currentLocation: editLocation,
++      bio: editBio,
++      // Salva todos os 7 campos adicionais
++      preferredDestination: editPreferredDestination,
++      emergencyContactName: editEmergencyContactName,
++      emergencyContactPhone: editEmergencyContactPhone,
++      contactPhone: editContactPhone,
++      currentAddress: editCurrentAddress,
++      professionalArea: editProfessionalArea,
++      medicalConditions: editMedicalConditions,
++    };
++    onUpdateUser(updated);
++    setEditOpen(false);
++  };
++
++  const openProgramModal = (program: Program) => {
++    setSelectedProgram(program);
++    setProgramModalOpen(true);
++  };
++
++  const closeProgramModal = () => {
++    setSelectedProgram(null);
++    setProgramModalOpen(false);
++  };
++
++  if (!currentUser) {
++    return (
++      <div className="container mx-auto px-4 py-12">
++        <p className="text-center text-gray-600">Você precisa entrar para ver seu perfil.</p>
++      </div>
++    );
++  }
++
++  return (
++    <div className="bg-gray-50 min-h-[calc(100vh-80px)]">
++      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
++        
++        {/* Dashboard Header - Estrutura similar ao Painel da Agência */}
++        <div className="bg-white p-6 rounded-xl shadow mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border border-gray-100">
++            <div className="flex items-center gap-6">
++                <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 rounded-full object-cover shadow-sm border-4 border-rose-50" />
++                <div>
++                    <h1 className="text-3xl font-extrabold text-gray-900">{currentUser.name}</h1>
++                    <p className="text-base text-gray-600 mt-1">{currentUser.email}</p>
++                </div>
++            </div>
++            <div className="flex flex-col items-start md:items-end gap-3">
++                <button onClick={openEdit} className="px-5 py-2 bg-rose-500 text-white rounded-md shadow hover:bg-rose-600 font-semibold transition-colors">
++                    Editar perfil
++                </button>
++                <button onClick={onBack} className="text-rose-500 hover:text-rose-400 font-semibold flex items-center">
++                   &larr; Voltar
++                </button>
++            </div>
++        </div>
++        {/* FIM Dashboard Header */}
++
++        {/* Tabs */}
++        <div className="border-b border-gray-200 mb-8">
++          <nav className="-mb-px flex space-x-8">
++            <button
++              onClick={() => setActiveTab('profile')}
++              className={`${activeTab === 'profile' ? 'border-rose-500 text-rose-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg capitalize transition-colors`}
++            >
++              Perfil
++            </button>
++
++            <button
++              onClick={() => setActiveTab('history')}
++              className={`${activeTab === 'history' ? 'border-rose-500 text-rose-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg capitalize transition-colors`}
++            >
++              Histórico
++            </button>
++          </nav>
++        </div>
++
++        {/* Perfil Content (Refatorado para o novo template) */}
++        {activeTab === 'profile' && (
++          <div className="space-y-6">
++            
++            {/* Seção Sobre/Bio */}
++            <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
++              <h3 className="text-xl font-semibold text-gray-900 mb-3 border-b pb-2">Sobre</h3>
++              <p className="text-gray-700 leading-relaxed">
++                {currentUser.bio || 'Sem bio disponível. Clique em editar para adicionar.'}
++              </p>
++            </div>
++
++            {/* Seção Detalhes, Contato e Endereço (usando grid como no dashboard) */}
++            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
++                 {/* Informações Pessoais e Profissionais */}
++                 <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
++                    <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Detalhes Pessoais</h3>
++                    <dl className="space-y-3 text-gray-700">
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Nacionalidade:</dt>
++                            <dd className="font-semibold">{currentUser.nationality || '-'}</dd>
++                        </div>
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Telefone Pessoal:</dt>
++                            <dd className="font-semibold">{currentUser.contactPhone || '-'}</dd>
++                        </div>
++                        {/* NOVO CAMPO: Área Profissional */}
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Área Profissional:</dt>
++                            <dd className="font-semibold">{currentUser.professionalArea || '-'}</dd>
++                        </div>
++                        {/* Campo: Destino Preferido */}
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Destino preferido:</dt>
++                            <dd className="font-semibold">{currentUser.preferredDestination || '-'}</dd>
++                        </div>
++                    </dl>
++                 </div>
++                 
++                 {/* Localização e Segurança */}
++                 <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
++                    <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Localização e Segurança</h3>
++                    <dl className="space-y-3 text-gray-700">
++                         <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Local atual:</dt>
++                            <dd className="font-semibold">{currentUser.currentLocation || '-'}</dd>
++                        </div>
++                        {/* NOVO CAMPO: Condições Médicas */}
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-gray-600">Condições Médicas:</dt>
++                            <dd className="font-semibold text-red-500">{currentUser.medicalConditions || 'Nenhuma informada.'}</dd>
++                        </div>
++                         {/* Endereço Atual */}
++                        <div className="flex flex-col mb-4 pt-3 border-t border-gray-100">
++                            <dt className="font-medium text-gray-600">Endereço de Acomodação Atual:</dt>
++                            <dd className="font-semibold mt-1 bg-gray-50 p-2 rounded-md border border-gray-100 text-sm break-words">
++                                {currentUser.currentAddress || 'Endereço não informado. Por favor, adicione.'}
++                            </dd>
++                        </div>
++                         {/* Campos de Contato de Emergência */}
++                        <div className="flex justify-between pt-3 border-t border-gray-100">
++                            <dt className="font-medium text-red-500">Emergência (Nome):</dt>
++                            <dd className="font-semibold">{currentUser.emergencyContactName || '-'}</dd>
++                        </div>
++                        <div className="flex justify-between">
++                            <dt className="font-medium text-red-500">Emergência (Telefone):</dt>
++                            <dd className="font-semibold">{currentUser.emergencyContactPhone || '-'}</dd>
++                        </div>
++                    </dl>
++                 </div>
++            </div>
++          </div>
++        )}
++
++        {/* Histórico Content (Permanece Inalterado) */}
++        {activeTab === 'history' && (
++          <div>
++            <h3 className="text-xl font-semibold text-gray-900 mb-4">Histórico de Programas e Cursos</h3>
++
++            {userPrograms.length === 0 ? (
++              <div className="bg-white p-6 rounded-xl shadow text-center text-gray-600">
++                Sem histórico ainda.
++              </div>
++            ) : (
++              <div className="space-y-4">
++                {userPrograms.map((p) => (
++                  <div key={p.id} className="bg-white p-4 rounded-lg shadow border border-gray-100">
++                    <div className="flex justify-between items-start gap-4">
++                      <div className="flex-1">
++                        <h4 className="font-semibold text-gray-800">{p.name}</h4>
++                        <p className="text-sm text-gray-600">
++                          { (p as any).institution || p.agency?.name || 'Instituição não informada' } — {p.destinationCity || '-'}, {p.destinationCountry || '-'}
++                        </p>
++
++                        {p.startDate && (
++                          <p className="text-sm text-gray-500 mt-1"><strong>Início da viagem:</strong> {p.startDate}</p>
++                        )}
++                        {p.endDate && (
++                          <p className="text-sm text-gray-500"><strong>Fim da viagem:</strong> {p.endDate}</p>
++                        )}
++                      </div>
++
++                      <div className="flex flex-col items-end gap-2">
++                        <button onClick={() => openProgramModal(p)} className="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700">Visualizar Intercâmbio</button>
++
++                        {/* Rating UI */}
++                        <div className="flex items-center gap-1 mt-2">
++                          <div className="text-sm text-gray-600">Avaliar:</div>
++                          <div className="flex items-center">
++                            {[1,2,3,4,5].map(st => {
++                              const filled = (ratings[p.id] || 0) >= st;
++                              return (
++                                <button
++                                  key={st}
++                                  onClick={() => setRating(p.id, st)}
++                                  title={`${st} estrela${st>1?'s':''}`}
++                                  className={`w-7 h-7 flex items-center justify-center rounded ${filled ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400`}
++                                  aria-label={`Avaliar ${st} estrela`}
++                                >
++                                  <StarIcon className="w-5 h-5" />
++                                </button>
++                              );
++                            })}
++                          </div>
++                        </div>
++                      </div>
++                    </div>
++
++                    <p className="mt-2 text-gray-700">{p.shortDescription || p.longDescription || ''}</p>
++                  </div>
++                ))}
++              </div>
++            )}
++          </div>
++        )}
++      </div>
++
++      {/* Edit Profile Modal (Atualizado com todos os 7 campos) */}
++      {isEditOpen && (
++        <div className="fixed inset-0 bg-black bg-opacity-50 z-[3000] flex items-center justify-center p-4 backdrop-blur-sm">
++          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
++            <h3 className="text-2xl font-bold mb-4 text-gray-900 border-b pb-3">Editar perfil</h3>
++            <form onSubmit={saveProfile} className="space-y-4">
++              
++              {/* Informações Pessoais */}
++              <div className="space-y-4 border-b pb-4 border-gray-100">
++                  <h4 className="font-bold text-gray-800">Informações Pessoais</h4>
++                  <div>
++                      <label className="block text-sm font-medium text-gray-700">Nome</label>
++                      <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
++                  </div>
++                  <div>
++                      <label className="block text-sm font-medium text-gray-700">Nacionalidade</label>
++                      <input value={editNationality} onChange={e => setEditNationality(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
++                  </div>
++                   <div>
++                    <label className="block text-sm font-medium text-gray-700">Telefone Pessoal</label>
++                    <input value={editContactPhone} onChange={e => setEditContactPhone(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: +49 151 1234 5678" />
++                  </div>
++              </div>
++              
++              {/* Informações de Viagem e Carreira */}
++              <div className="pt-4 border-b pb-4 border-gray-100 space-y-4">
++                  <h4 className="font-bold text-gray-800">Viagem e Carreira</h4>
++                  <div>
++                      <label className="block text-sm font-medium text-gray-700">Local atual (Cidade, País)</label>
++                      <input value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" />
++                  </div>
++                  <div>
++                    <label className="block text-sm font-medium text-gray-700">Destino Preferido</label>
++                    <input value={editPreferredDestination} onChange={e => setEditPreferredDestination(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: Tóquio, Japão" />
++                  </div>
++                   {/* NOVO CAMPO: Área Profissional */}
++                  <div>
++                    <label className="block text-sm font-medium text-gray-700">Área Profissional</label>
++                    <input value={editProfessionalArea} onChange={e => setEditProfessionalArea(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: Ciência da Computação, Marketing" />
++                  </div>
++                  <div>
++                    <label className="block text-sm font-medium text-gray-700">Endereço de Acomodação Atual</label>
++                    <textarea value={editCurrentAddress} onChange={e => setEditCurrentAddress(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={2} placeholder="Rua, Número, CEP, Cidade, País." />
++                  </div>
++              </div>
++
++              {/* Saúde e Emergência */}
++              <div className="pt-4 border-b pb-4 border-gray-100 space-y-4">
++                <h4 className="font-bold text-red-600 mb-2">Saúde e Emergência</h4>
++                 {/* NOVO CAMPO: Condições Médicas */}
++                <div>
++                  <label className="block text-sm font-medium text-gray-700">Condições Médicas / Alergias (Opcional)</label>
++                  <textarea value={editMedicalConditions} onChange={e => setEditMedicalConditions(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={2} placeholder="Ex: Diabetes Tipo 1, Alergia a Penicilina. (Para uso em caso de emergência)." />
++                </div>
++                <div>
++                  <label className="block text-sm font-medium text-gray-700">Nome do Contato de Emergência</label>
++                  <input value={editEmergencyContactName} onChange={e => setEditEmergencyContactName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Nome Completo" />
++                </div>
++                <div>
++                  <label className="block text-sm font-medium text-gray-700">Telefone do Contato de Emergência</label>
++                  <input value={editEmergencyContactPhone} onChange={e => setEditEmergencyContactPhone(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" placeholder="Ex: +55 11 99999-8888" />
++                </div>
++              </div>
++
++              {/* Bio */}
++              <div>
++                <label className="block text-sm font-medium text-gray-700">Bio</label>
++                <textarea value={editBio} onChange={e => setEditBio(e.target.value)} className="w-full border border-gray-300 rounded-md p-2" rows={3} />
++              </div>
++
++              <div className="flex justify-end gap-3 pt-4 border-t mt-4">
++                <button type="button" onClick={() => setEditOpen(false)} className="px-4 py-2 border rounded-md">Cancelar</button>
++                <button type="submit" className="px-4 py-2 bg-rose-600 text-white rounded-md">Salvar</button>
++              </div>
++            </form>
++          </div>
++        </div>
++      )}
++
++      {/* Program View Modal (Permanece inalterado) */}
++      {isProgramModalOpen && selectedProgram && (
++        <div className="fixed inset-0 bg-black bg-opacity-60 z-[3000] flex items-center justify-center p-4">
++          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
++            <div className="flex justify-between items-start mb-4">
++              <h2 className="text-2xl font-bold">{selectedProgram.name}</h2>
++              <button onClick={closeProgramModal} className="text-gray-400 hover:text-gray-600">
++                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
++              </button>
++            </div>
++
++            {selectedProgram.image && <img src={selectedProgram.image} alt={selectedProgram.name} className="w-full h-48 object-cover rounded-lg mb-4" />}
++
++            <div className="space-y-4">
++              <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
++                <span className="font-semibold text-gray-700">Localização:</span>
++                <span>{selectedProgram.destinationCity}, {selectedProgram.destinationCountry}</span>
++              </div>
++              <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
++                <span className="font-semibold text-gray-700">Preço:</span>
++                <span className="font-bold text-rose-600 text-2xl">${selectedProgram.price}</span>
++              </div>
++
++              <div>
++                <h3 className="font-bold text-gray-800 mb-2">Descrição</h3>
++                <p className="text-gray-600 whitespace-pre-line leading-relaxed">{selectedProgram.longDescription || selectedProgram.shortDescription}</p>
++              </div>
++
++              <div>
++                <h3 className="font-bold text-gray-800 mb-2">O que está incluso</h3>
++                <div className="flex flex-wrap gap-2">
++                  {(selectedProgram.includes || []).map((inc, idx) => (
++                    <span key={idx} className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-sm font-medium border border-rose-100">{inc}</span>
++                  ))}
++                </div>
++              </div>
++            </div>
++
++            <div className="mt-6 flex justify-end gap-3">
++              <button onClick={closeProgramModal} className="px-4 py-2 rounded-md border">Fechar</button>
++            </div>
++          </div>
++        </div>
++      )}
++    </div>
++  );
++};
++
++export default ProfilePage;
+\ No newline at end of file
+diff --git a/pages/ProgramsPage.tsx b/pages/ProgramsPage.tsx
+index 9984f57..ddfd42b 100644
+--- a/pages/ProgramsPage.tsx
++++ b/pages/ProgramsPage.tsx
+@@ -1,3 +1,4 @@
++
+ import React, { useState, useMemo, useEffect } from 'react';
+ import { Program, Agency } from '../types';
+ import { ProgramCard } from '../components/ProgramCard';
+@@ -18,18 +19,13 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
+   const [selectedDestination, setSelectedDestination] = useState('');
+   const [selectedAgency, setSelectedAgency] = useState(initialAgencyId || '');
+   
+-  // Estado para armazenar os selos selecionados
+-  const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
++  // Novo estado para filtrar por Níveis do Selo
++  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+   
+   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+   const [showScrollTop, setShowScrollTop] = useState(false);
+ 
+-  // Opções atualizadas conforme os novos selos do sistema
+-  const certificationOptions = [
+-    "Suporte 24/7",
+-    "Female-Only", 
+-    "Women's Health"
+-  ];
++  const tiers = ['Ouro', 'Prata', 'Bronze', 'Padrão'];
+ 
+   useEffect(() => {
+     const checkScrollTop = () => {
+@@ -56,43 +52,36 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
+ 
+   const filteredPrograms = useMemo(() => {
+     const lowerCaseQuery = searchQuery.toLowerCase();
+-    
+     return allPrograms.filter(p => {
+-      // 1. Filtro de Texto
+       const queryMatch = lowerCaseQuery
+         ? p.name.toLowerCase().includes(lowerCaseQuery) ||
+           p.shortDescription.toLowerCase().includes(lowerCaseQuery)
+         : true;
+-        
+-      // 2. Filtro de Destino
+       const destinationMatch = selectedDestination
+         ? `${p.destinationCity}, ${p.destinationCountry}` === selectedDestination
+         : true;
+-        
+-      // 3. Filtro de Agência
+       const agencyMatch = selectedAgency
+         ? p.agency.id.toString() === selectedAgency
+         : true;
+ 
+-      // 4. Lógica de Filtro por Selos (Atualizada)
+-      // Combina certificações da agência e do programa para verificar
+-      const allProgramSeals = [
+-        ...(p.agency.certifications || []),
+-        ...(p.verifications || [])
+-      ];
++      // Lógica de cálculo do Tier para filtro
++      const score = (p.agency.certifications?.length || 0) + (p.verifications?.length || 0);
++      let tier = 'Padrão';
++      if (score >= 10) tier = 'Ouro';
++      else if (score >= 8) tier = 'Prata';
++      else if (score >= 5) tier = 'Bronze';
+ 
+-      // Verifica se o programa possui TODOS os selos selecionados (Lógica AND)
+-      // Se a lista de selecionados estiver vazia, retorna true (mostra tudo)
+-      const certMatch = selectedCertifications.length === 0 || 
+-        selectedCertifications.every(selectedCert => allProgramSeals.includes(selectedCert));
++      const tierMatch = selectedTiers.length > 0
++        ? selectedTiers.includes(tier)
++        : true;
+ 
+-      return queryMatch && destinationMatch && agencyMatch && certMatch;
++      return queryMatch && destinationMatch && agencyMatch && tierMatch;
+     });
+-  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedCertifications]);
++  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedTiers]);
+ 
+-  const toggleCertification = (cert: string) => {
+-    setSelectedCertifications(prev =>
+-      prev.includes(cert) ? prev.filter(c => c !== cert) : [...prev, cert]
++  const toggleTier = (tier: string) => {
++    setSelectedTiers(prev =>
++      prev.includes(tier) ? prev.filter(t => t !== tier) : [...prev, tier]
+     );
+   };
+   
+@@ -154,38 +143,22 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
+                     <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showAdvancedFilters ? 'max-h-[300px] opacity-100 pt-4 mt-4 border-t' : 'max-h-0 opacity-0'}`}>
+                         <div className="space-y-4">
+                             <div>
+-                                <h4 className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+-                                  Filtrar por Selo Women Go Safe:
+-                                </h4>
++                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Nível do Selo Women Go Safe:</h4>
+                                 <div className="flex flex-wrap gap-2">
+-                                {certificationOptions.map(cert => (
++                                {tiers.map(tier => (
+                                     <button
+-                                    key={cert}
+-                                    onClick={() => toggleCertification(cert)}
+-                                    className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200 transform hover:scale-105 flex items-center gap-2 ${
+-                                        selectedCertifications.includes(cert)
++                                    key={tier}
++                                    onClick={() => toggleTier(tier)}
++                                    className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200 transform hover:scale-105 ${
++                                        selectedTiers.includes(tier)
+                                             ? 'bg-rose-500 text-white border-rose-500 shadow-md'
+                                             : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                     }`}
+                                     >
+-                                    {/* Pequeno indicador visual de check quando ativo */}
+-                                    {selectedCertifications.includes(cert) && (
+-                                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+-                                      </svg>
+-                                    )}
+-                                    {cert}
++                                    Selo {tier}
+                                     </button>
+                                 ))}
+                                 </div>
+-                                {selectedCertifications.length > 0 && (
+-                                  <button 
+-                                    onClick={() => setSelectedCertifications([])}
+-                                    className="mt-2 text-xs text-rose-500 hover:text-rose-700 underline"
+-                                  >
+-                                    Limpar filtros
+-                                  </button>
+-                                )}
+                             </div>
+                         </div>
+                     </div>
+@@ -213,15 +186,7 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
+               <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+             </svg>
+             <h3 className="mt-2 text-sm font-semibold text-gray-900">Nenhum resultado</h3>
+-            <p className="mt-1 text-sm text-gray-500">
+-               Tente desmarcar alguns selos ou ajustar sua busca.
+-            </p>
+-            <button 
+-               onClick={() => { setSelectedCertifications([]); setSearchQuery(''); setSelectedDestination(''); setSelectedAgency(''); }}
+-               className="mt-4 text-rose-600 hover:text-rose-800 font-medium"
+-            >
+-               Limpar todos os filtros
+-            </button>
++            <p className="mt-1 text-sm text-gray-500">Tente ajustar seus filtros de busca.</p>
+           </div>
+         )}
+       </div>
+@@ -236,4 +201,4 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
+       )}
+     </div>
+   );
+-};
+\ No newline at end of file
++};
+diff --git a/public/images/persona.png b/public/images/persona.png
+new file mode 100644
+index 0000000..081699f
+Binary files /dev/null and b/public/images/persona.png differ
+diff --git a/public/seals/saude.png b/public/seals/saude.png
+index 6a330e6..9d7f93e 100644
+Binary files a/public/seals/saude.png and b/public/seals/saude.png differ
+diff --git a/types.ts b/types.ts
+index 1f540a6..f709b9d 100644
+--- a/types.ts
++++ b/types.ts
+@@ -1,3 +1,19 @@
++export interface User {
++  name: string;
++  email: string;
++  avatar: string;
++  nationality?: string;      // ex: 'Brasil'
++  currentLocation?: string;  // ex: 'Lisboa, Portugal'
++  bio?: string;
++  preferredDestination?: string;  // ex: 'Tóquio, Japão'
++  emergencyContactName?: string;
++  emergencyContactPhone?: string; // ex: '+55 11 98888-7777'
++  // NOVOS CAMPOS ADICIONADOS
++  contactPhone?: string; // ex: '+49 151 1234 5678'
++  currentAddress?: string; // ex: 'Musterstraße 5, 10117 Berlin, Deutschland'
++  professionalArea?: string;
++  medicalConditions?: string;
++}
+ 
+ export interface Feedback {
+   id: number;
+@@ -32,6 +48,10 @@ export interface Program {
+   image: string;
+   verifications?: string[];
+   purchaseCount?: number;
++  institution?: string;   // nome da instituição (quando program.institution for usado)
++  ownerEmail?: string;    // para associar um programa a um usuário mock
++  startDate?: string;     // exemplo: '2024-02-01'
++  endDate?: string;       // exemplo: '2024-07-31'
+ }
+ 
+ export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';

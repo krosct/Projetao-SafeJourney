@@ -2,6 +2,29 @@
 
 import { Agency, Program, Feedback, CitySafetyData, Course, SafetyStatus } from '../types';
 
+// data/mockAuth.ts
+import { User } from '../types';
+
+export const MOCK_AUTH_USER: (User & { password: string }) = {
+  name: 'Maria Azevedo',
+  email: 'maria@app.com.br',
+  avatar: '/images/persona.png', 
+  password: '123456',
+  nationality: 'Brasil',
+  currentLocation: 'Berlim, Alemanha',
+  bio: 'Estudante de intercâmbio entusiasmada com a cultura e tecnologia, buscando sempre novos desafios e objetivos maiores.',
+  
+  // Campos Adicionais
+  preferredDestination: 'Tóquio, Japão',
+  emergencyContactName: 'João da Silva (Irmão)',
+  emergencyContactPhone: '+55 11 98888-7777',
+  contactPhone: '+49 151 1234 5678',
+  currentAddress: 'Musterstraße 5, 10117 Berlin, Deutschland',
+  
+  // NOVOS CAMPOS ADICIONADOS
+  professionalArea: 'Tecnologia e Design',
+  medicalConditions: 'Diabética',
+};
 // --- CONSTANTS ---
 export const CERTIFICATIONS = [
   "Suporte 24/7",

@@ -1,3 +1,19 @@
+export interface User {
+  name: string;
+  email: string;
+  avatar: string;
+  nationality?: string;      // ex: 'Brasil'
+  currentLocation?: string;  // ex: 'Lisboa, Portugal'
+  bio?: string;
+  preferredDestination?: string;  // ex: 'Tóquio, Japão'
+  emergencyContactName?: string;
+  emergencyContactPhone?: string; // ex: '+55 11 98888-7777'
+  // NOVOS CAMPOS ADICIONADOS
+  contactPhone?: string; // ex: '+49 151 1234 5678'
+  currentAddress?: string; // ex: 'Musterstraße 5, 10117 Berlin, Deutschland'
+  professionalArea?: string;
+  medicalConditions?: string;
+}
 
 export interface Feedback {
   id: number;
@@ -32,6 +48,10 @@ export interface Program {
   image: string;
   verifications?: string[];
   purchaseCount?: number;
+  institution?: string;   // nome da instituição (quando program.institution for usado)
+  ownerEmail?: string;    // para associar um programa a um usuário mock
+  startDate?: string;     // exemplo: '2024-02-01'
+  endDate?: string;       // exemplo: '2024-07-31'
 }
 
 export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';
