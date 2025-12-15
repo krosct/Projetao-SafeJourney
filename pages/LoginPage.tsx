@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
+import { MOCK_AUTH_USER } from '../data/mockData';
 
 interface LoginPageProps {
     onBack: () => void;
@@ -70,15 +71,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
         e.preventDefault();
         if (email === 'agencia@app.com.br' && password === '123456') {
              onLogin({
-                name: "Agência Exemplo",
+                name: "Global Sisters Exchange",
                 email: email,
-                avatar: "https://i.pravatar.cc/150?u=agency"
+                avatar: "./public/logos/Global Sisters Exchange.png"
             });
-        } else {
+        } else if(email === 'maria@app.com.br' && password === '123456') {
             onLogin({
                 name: "Maria Silva",
-                email: "maria.silva@example.com",
-                avatar: "https://i.pravatar.cc/150?img=5"
+                email: email,
+                avatar: "./public/images/persona.png",
+                nationality: 'Brasil',
+                currentLocation: 'Berlim, Alemanha',
+                bio: 'Estudante de intercâmbio entusiasmada com a cultura e arte, buscando sempre novos desafios e objetivos maiores.',
+                preferredDestination: 'Suiça',
+                emergencyContactName: 'João da Silva (Irmão)',
+                emergencyContactPhone: '+55 81 98888-7777',
+                contactPhone: '+55 81 992912-7712',
+                currentAddress: 'Musterstrabe 5, 10117 Berlin, Deutschland',
+                professionalArea: 'Design',
+                medicalConditions: 'Nenhuma conhecida.',
+
+
             });
         }
     };

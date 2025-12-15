@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, activePage, currentU
               ) : (
                 <button
                   onClick={() => onNavigate('login')}
-                  className="px-5 py-2 bg-rose-400 text-white font-semibold rounded-md shadow-md hover:bg-rose-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300"
+                  className="px-5 py-2 bg-rose-600 text-white font-semibold rounded-md shadow-md hover:bg-rose-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300"
                 >
                   Entrar
                 </button>

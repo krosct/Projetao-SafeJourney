@@ -84,6 +84,18 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  nationality?: string;      // ex: 'Brasil'
+  currentLocation?: string;  // ex: 'Lisboa, Portugal'
+  bio?: string;
+  
+  // CAMPOS DE VIAGEM E CONTATO (CONSOLIDADOS)
+  preferredDestination?: string;  // ex: 'Tóquio, Japão'
+  emergencyContactName?: string;
+  emergencyContactPhone?: string; // ex: '+55 11 98888-7777'
+  contactPhone?: string; // ex: '+49 151 1234 5678'
+  currentAddress?: string; // ex: 'Musterstraße 5, 10117 Berlin, Deutschland'
+  professionalArea?: string; // ex: 'Tecnologia e Design'
+  medicalConditions?: string; // ex: 'Diabetes Tipo 1, Asma'
 }
 
 export interface ContentSectionItem {
