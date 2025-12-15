@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Program, Agency } from '../types';
 import { ProgramCard } from '../components/ProgramCard';
@@ -19,13 +18,18 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
   const [selectedDestination, setSelectedDestination] = useState('');
   const [selectedAgency, setSelectedAgency] = useState(initialAgencyId || '');
   
-  // Novo estado para filtrar por Níveis do Selo
-  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+  // Estado para armazenar os selos selecionados
+  const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
   
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const tiers = ['Ouro', 'Prata', 'Bronze', 'Padrão'];
+  // Opções atualizadas conforme os novos selos do sistema
+  const certificationOptions = [
+    "Suporte 24/7",
+    "Female-Only", 
+    "Women's Health"
+  ];
 
   useEffect(() => {
     const checkScrollTop = () => {
@@ -52,36 +56,43 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
 
   const filteredPrograms = useMemo(() => {
     const lowerCaseQuery = searchQuery.toLowerCase();
+    
     return allPrograms.filter(p => {
+      // 1. Filtro de Texto
       const queryMatch = lowerCaseQuery
         ? p.name.toLowerCase().includes(lowerCaseQuery) ||
           p.shortDescription.toLowerCase().includes(lowerCaseQuery)
         : true;
+        
+      // 2. Filtro de Destino
       const destinationMatch = selectedDestination
         ? `${p.destinationCity}, ${p.destinationCountry}` === selectedDestination
         : true;
+        
+      // 3. Filtro de Agência
       const agencyMatch = selectedAgency
         ? p.agency.id.toString() === selectedAgency
         : true;
 
-      // Lógica de cálculo do Tier para filtro
-      const score = (p.agency.certifications?.length || 0) + (p.verifications?.length || 0);
-      let tier = 'Padrão';
-      if (score >= 10) tier = 'Ouro';
-      else if (score >= 8) tier = 'Prata';
-      else if (score >= 5) tier = 'Bronze';
+      // 4. Lógica de Filtro por Selos (Atualizada)
+      // Combina certificações da agência e do programa para verificar
+      const allProgramSeals = [
+        ...(p.agency.certifications || []),
+        ...(p.verifications || [])
+      ];
 
-      const tierMatch = selectedTiers.length > 0
-        ? selectedTiers.includes(tier)
-        : true;
+      // Verifica se o programa possui TODOS os selos selecionados (Lógica AND)
+      // Se a lista de selecionados estiver vazia, retorna true (mostra tudo)
+      const certMatch = selectedCertifications.length === 0 || 
+        selectedCertifications.every(selectedCert => allProgramSeals.includes(selectedCert));
 
-      return queryMatch && destinationMatch && agencyMatch && tierMatch;
+      return queryMatch && destinationMatch && agencyMatch && certMatch;
     });
-  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedTiers]);
+  }, [allPrograms, searchQuery, selectedDestination, selectedAgency, selectedCertifications]);
 
-  const toggleTier = (tier: string) => {
-    setSelectedTiers(prev =>
-      prev.includes(tier) ? prev.filter(t => t !== tier) : [...prev, tier]
+  const toggleCertification = (cert: string) => {
+    setSelectedCertifications(prev =>
+      prev.includes(cert) ? prev.filter(c => c !== cert) : [...prev, cert]
     );
   };
   
@@ -143,22 +154,38 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
                     <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showAdvancedFilters ? 'max-h-[300px] opacity-100 pt-4 mt-4 border-t' : 'max-h-0 opacity-0'}`}>
                         <div className="space-y-4">
                             <div>
-                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Filtrar por Nível do Selo Women Go Safe:</h4>
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+                                  Filtrar por Selo Women Go Safe:
+                                </h4>
                                 <div className="flex flex-wrap gap-2">
-                                {tiers.map(tier => (
+                                {certificationOptions.map(cert => (
                                     <button
-                                    key={tier}
-                                    onClick={() => toggleTier(tier)}
-                                    className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200 transform hover:scale-105 ${
-                                        selectedTiers.includes(tier)
+                                    key={cert}
+                                    onClick={() => toggleCertification(cert)}
+                                    className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200 transform hover:scale-105 flex items-center gap-2 ${
+                                        selectedCertifications.includes(cert)
                                             ? 'bg-rose-500 text-white border-rose-500 shadow-md'
                                             : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                                     }`}
                                     >
-                                    Selo {tier}
+                                    {/* Pequeno indicador visual de check quando ativo */}
+                                    {selectedCertifications.includes(cert) && (
+                                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    )}
+                                    {cert}
                                     </button>
                                 ))}
                                 </div>
+                                {selectedCertifications.length > 0 && (
+                                  <button 
+                                    onClick={() => setSelectedCertifications([])}
+                                    className="mt-2 text-xs text-rose-500 hover:text-rose-700 underline"
+                                  >
+                                    Limpar filtros
+                                  </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -186,7 +213,15 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ allPrograms, allAgen
               <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             </svg>
             <h3 className="mt-2 text-sm font-semibold text-gray-900">Nenhum resultado</h3>
-            <p className="mt-1 text-sm text-gray-500">Tente ajustar seus filtros de busca.</p>
+            <p className="mt-1 text-sm text-gray-500">
+               Tente desmarcar alguns selos ou ajustar sua busca.
+            </p>
+            <button 
+               onClick={() => { setSelectedCertifications([]); setSearchQuery(''); setSelectedDestination(''); setSelectedAgency(''); }}
+               className="mt-4 text-rose-600 hover:text-rose-800 font-medium"
+            >
+               Limpar todos os filtros
+            </button>
           </div>
         )}
       </div>
