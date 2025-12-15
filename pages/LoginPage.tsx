@@ -83,7 +83,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLogin }) => {
                 nationality: 'Brasil',
                 currentLocation: 'Berlim, Alemanha',
                 bio: 'Estudante de intercâmbio entusiasmada com a cultura e arte, buscando sempre novos desafios e objetivos maiores.',
-                preferredDestination: 'Suiça',
+                age: '22',
                 emergencyContactName: 'João da Silva (Irmão)',
                 emergencyContactPhone: '+55 81 98888-7777',
                 contactPhone: '+55 81 992912-7712',

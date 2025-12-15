@@ -10,7 +10,7 @@ export const MOCK_AUTH_USER = {
   nationality: 'Brasil',
   currentLocation: 'Berlim, Alemanha',
   bio: 'Estudante de intercâmbio entusiasmada com a cultura e tecnologia, buscando sempre novos desafios e objetivos maiores.',
-  preferredDestination: 'Tóquio, Japão',
+  age: '22',
   emergencyContactName: 'João da Silva (Irmão)',
   emergencyContactPhone: '+55 11 98888-7777',
   contactPhone: '+49 151 1234 5678',

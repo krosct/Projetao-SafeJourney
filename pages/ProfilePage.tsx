@@ -249,8 +249,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ currentUser, onBack, o
                         </div>
                         {/* Campo: Destino Preferido */}
                         <div className="flex justify-between">
-                            <dt className="font-medium text-gray-600">Destino preferido:</dt>
-                            <dd className="font-semibold">{currentUser.preferredDestination || '-'}</dd>
+                            <dt className="font-medium text-gray-600">Idade:</dt>
+                            <dd className="font-semibold">{currentUser.age || '-'}</dd>
                         </div>
                     </dl>
                  </div>

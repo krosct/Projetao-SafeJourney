@@ -89,7 +89,7 @@ export interface User {
   bio?: string;
   
   // CAMPOS DE VIAGEM E CONTATO (CONSOLIDADOS)
-  preferredDestination?: string;  // ex: 'Tóquio, Japão'
+  age?: string;  // ex: 'Tóquio, Japão'
   emergencyContactName?: string;
   emergencyContactPhone?: string; // ex: '+55 11 98888-7777'
   contactPhone?: string; // ex: '+49 151 1234 5678'
