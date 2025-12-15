@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect} from 'react';
 import { Page, Program, Agency, Course, User, ContentPageData } from './types';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -17,9 +17,11 @@ import { CourseDetailPage } from './pages/CourseDetailPage';
 import { LoginPage } from './pages/LoginPage';
 import { InfoRequestModal } from './components/InfoRequestModal';
 import { AboutPage } from './pages/AboutPage';
-
-
 import { AgencyDashboardPage } from './pages/AgencyDashboardPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { HistoryPage } from './pages/HistoryPage';
+import { MOCK_AUTH_USER } from './data/mockData';
+
 
 const AgencyDetailPage: React.FC<{
   agency: Agency;
@@ -85,6 +87,19 @@ const App: React.FC = () => {
   const [contentPageData, setContentPageData] = useState<ContentPageData | null>(null);
   const [history, setHistory] = useState<Page[]>(['home']);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+    // Persistência simples: restaura usuário salvo no localStorage (se houver)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('sj_user');
+      if (raw) {
+        const parsed = JSON.parse(raw) as User;
+        setCurrentUser(parsed);
+      }
+    } catch (err) {
+      // ignore parse erros
+      console.warn('Não foi possível restaurar usuário do localStorage', err);
+    }
+  }, []);
 
   const [isInfoModalOpen, setInfoModalOpen] = useState(false);
   const [infoRequestProgram, setInfoRequestProgram] = useState<Program | null>(null);
@@ -95,8 +110,17 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleLogin = (user: User) => {
+  
+
+    const handleLogin = (user: User) => {
     setCurrentUser(user);
+    // salva usuário no localStorage para persistência entre reloads
+    try {
+      localStorage.setItem('sj_user', JSON.stringify(user));
+    } catch (err) {
+      console.warn('Falha ao salvar usuário no localStorage', err);
+    }
+
     if (user.email === 'agencia@app.com.br') {
       navigate('agencyDashboard');
     } else {
@@ -106,7 +130,21 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    try {
+      localStorage.removeItem('sj_user');
+    } catch (err) {
+      console.warn('Falha ao remover usuário do localStorage', err);
+    }
     navigate('home');
+  };
+
+  const handleUpdateUser = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('sj_user', JSON.stringify(updatedUser));
+    } catch (err) {
+      console.warn('Falha ao salvar usuário atualizado no localStorage', err);
+    }
   };
 
   // CRUD Operations for Agency Dashboard
@@ -270,6 +308,13 @@ const App: React.FC = () => {
         />;
       case 'login':
         return <LoginPage onBack={() => navigate('home')} onLogin={handleLogin} />;
+      
+      case 'profile':
+        return <ProfilePage currentUser={currentUser} onBack={handleBack} onUpdateUser={handleUpdateUser} />;
+
+      case 'history':
+        return <HistoryPage currentUser={currentUser} onBack={handleBack} />;
+
       case 'home':
       default:
         return <HomePage onProgramSelect={handleProgramSelect} onNavigate={handleNavigate} onSearch={handleSearch} />;
