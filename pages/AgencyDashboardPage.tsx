@@ -39,23 +39,54 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
   const [viewingProgram, setViewingProgram] = useState<Program | null>(null);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [viewingCourse, setViewingCourse] = useState<Course | null>(null);
+  const [selectedProgramForFeedbacks, setSelectedProgramForFeedbacks] = useState<Program | null>(null);
+  const [isFeedbacksModalOpen, setFeedbacksModalOpen] = useState(false);
 
   // Filter data for this agency
   const myPrograms = programs.filter(p => p.agency.id === agency.id);
   const myCourses = courses.filter(c => myPrograms.some(p => p.id === c.programId));
 
-  // Stats
+  // Enhanced Stats with more details
   const totalPrograms = myPrograms.length;
   const totalCourses = myCourses.length;
   const allFeedbacks = myPrograms.flatMap(p => p.feedbacks);
+  const totalFeedbacks = allFeedbacks.length;
   const avgRating = allFeedbacks.length > 0 
     ? allFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / allFeedbacks.length 
     : 0;
+  
+  // Calculate total sales
+  const totalProgramPurchases = myPrograms.reduce((acc, p) => acc + (p.purchaseCount || 0), 0);
+  const totalCoursePurchases = myCourses.reduce((acc, c) => acc + (c.purchaseCount || 0), 0);
+  const totalPurchases = totalProgramPurchases + totalCoursePurchases;
+
+  // Program performance stats
+  const programStats = myPrograms.map(program => {
+    const programFeedbacks = program.feedbacks;
+    const programAvgRating = programFeedbacks.length > 0
+      ? programFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / programFeedbacks.length
+      : 0;
+    return {
+      program,
+      avgRating: programAvgRating,
+      feedbackCount: programFeedbacks.length,
+      purchaseCount: program.purchaseCount || 0
+    };
+  }).sort((a, b) => b.avgRating - a.avgRating);
+
+  // Get feedbacks with program context
+  const feedbacksWithProgram = allFeedbacks.map(feedback => {
+    const program = myPrograms.find(p => p.feedbacks.some(f => f.id === feedback.id));
+    return { feedback, program };
+  }).sort((a, b) => new Date(b.feedback.date).getTime() - new Date(a.feedback.date).getTime());
 
   const handleSaveProgram = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
+    
+    const longDesc = formData.get('longDescription') as string;
+    const imageUrl = formData.get('imageUrl') as string;
     
     const newProgram: Program = {
       id: editingProgram ? editingProgram.id : Date.now(),
@@ -64,12 +95,13 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       destinationCity: formData.get('destinationCity') as string,
       destinationCountry: formData.get('destinationCountry') as string,
       price: Number(formData.get('price')),
-      shortDescription: (formData.get('longDescription') as string).substring(0, 100) + '...',
-      longDescription: formData.get('longDescription') as string,
+      shortDescription: longDesc.substring(0, 100) + (longDesc.length > 100 ? '...' : ''),
+      longDescription: longDesc,
       includes: (formData.get('includes') as string).split(',').map(s => s.trim()).filter(s => s !== ''),
       feedbacks: editingProgram ? editingProgram.feedbacks : [],
-      image: editingProgram ? editingProgram.image : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Default image
-      verifications: editingProgram ? editingProgram.verifications : []
+      image: imageUrl || (editingProgram ? editingProgram.image : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'),
+      verifications: editingProgram ? editingProgram.verifications : [],
+      purchaseCount: editingProgram ? editingProgram.purchaseCount : 0
     };
 
     if (editingProgram) {
@@ -95,7 +127,8 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       price: Number(formData.get('price')),
       programId: Number(formData.get('programId')),
       type: formData.get('type') as 'Curso' | 'Mentoria',
-      discountPercentage: Number(formData.get('discountPercentage')) || 0
+      discountPercentage: Number(formData.get('discountPercentage')) || 0,
+      purchaseCount: editingCourse ? editingCourse.purchaseCount : 0
     };
 
     if (editingCourse) {
@@ -127,8 +160,21 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
           background-color: #9ca3af;
         }
         /* Forçar esquema de cor clara para controles nativos neste componente */
-        .force-light-scheme {
-          color-scheme: light;
+        .force-light-scheme,
+        .force-light-scheme select,
+        .force-light-scheme option,
+        .force-light-scheme input,
+        .force-light-scheme textarea {
+          color-scheme: light !important;
+        }
+        /* Garantir que selects tenham fundo branco e texto preto */
+        .force-light-scheme select {
+          background-color: white !important;
+          color: #111827 !important;
+        }
+        .force-light-scheme select option {
+          background-color: white !important;
+          color: #111827 !important;
         }
       `}</style>
 
@@ -167,46 +213,218 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
 
         {/* Content */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
-                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Total de Programas</dt>
-                <dd className="mt-2 text-4xl font-extrabold text-gray-900">{totalPrograms}</dd>
+          <div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+              <div className="bg-gradient-to-br from-rose-500 to-pink-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
+                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Total de Programas</dt>
+                  <dd className="mt-2 text-5xl font-extrabold">{totalPrograms}</dd>
+                  <p className="text-xs mt-2 opacity-80">{totalProgramPurchases} vendas realizadas</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
+                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Cursos/Mentorias</dt>
+                  <dd className="mt-2 text-5xl font-extrabold">{totalCourses}</dd>
+                  <p className="text-xs mt-2 opacity-80">{totalCoursePurchases} vendas realizadas</p>
+              </div>
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 overflow-hidden shadow-lg rounded-xl p-6 text-white">
+                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Avaliação Média</dt>
+                  <dd className="mt-2 text-5xl font-extrabold flex items-center">
+                    {avgRating.toFixed(1)} <StarIcon className="w-8 h-8 ml-2" />
+                  </dd>
+                  <p className="text-xs mt-2 opacity-80">{totalFeedbacks} avaliações</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden shadow-lg rounded-xl p-6 text-white">
+                  <dt className="text-sm font-medium uppercase tracking-wider opacity-90">Total de Vendas</dt>
+                  <dd className="mt-2 text-5xl font-extrabold">{totalPurchases}</dd>
+                  <p className="text-xs mt-2 opacity-80">Programas + Cursos</p>
+              </div>
             </div>
-            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
-                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Total de Cursos</dt>
-                <dd className="mt-2 text-4xl font-extrabold text-gray-900">{totalCourses}</dd>
-            </div>
-            <div className="bg-white overflow-hidden shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
-                <dt className="text-sm font-medium text-gray-500 truncate uppercase tracking-wider">Avaliação Média</dt>
-                <dd className="mt-2 text-4xl font-extrabold text-gray-900 flex items-center">
-                  {avgRating.toFixed(1)} <StarIcon className="w-8 h-8 text-yellow-400 ml-2" />
-                </dd>
+
+            {/* Programs Performance */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span className="w-1 h-8 bg-rose-500 mr-3 rounded"></span>
+                Desempenho dos Programas
+              </h3>
+              <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                {programStats.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Programa</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Destino</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Vendas</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Avaliação</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Feedbacks</th>
+                          <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Preço</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {programStats.map(({ program, avgRating, feedbackCount, purchaseCount }) => (
+                          <tr 
+                            key={program.id} 
+                            className="hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              setSelectedProgramForFeedbacks(program);
+                              setFeedbacksModalOpen(true);
+                            }}
+                          >
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-semibold text-gray-900">{program.name}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-600">{program.destinationCity}, {program.destinationCountry}</div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                {purchaseCount}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <div className="inline-flex items-center bg-yellow-50 px-3 py-1 rounded-full">
+                                <span className="text-sm font-bold text-yellow-700 mr-1">
+                                  {feedbackCount > 0 ? avgRating.toFixed(1) : 'N/A'}
+                                </span>
+                                {feedbackCount > 0 && <StarIcon className="h-4 w-4 text-yellow-400" />}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                {feedbackCount}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="text-sm font-bold text-gray-900">${program.price}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="px-6 py-12 text-center text-gray-500">
+                    <p>Nenhum programa cadastrado ainda.</p>
+                  </div>
+                )}
+              </div>
             </div>
             
-            <div className="col-span-1 sm:col-span-3 mt-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Feedbacks Recentes</h3>
-                <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100">
-                    <ul className="divide-y divide-gray-100">
-                        {allFeedbacks.slice(0, 5).map((feedback) => (
-                            <li key={feedback.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center">
-                                        <img className="h-12 w-12 rounded-full border-2 border-white shadow-sm" src={feedback.avatar} alt="" />
-                                        <div className="ml-4">
-                                            <p className="text-base font-semibold text-rose-600">{feedback.author}</p>
-                                            <p className="text-sm text-gray-600 mt-1 italic">"{feedback.comment}"</p>
-                                        </div>
+            {/* Courses Performance */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span className="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+                Desempenho dos Cursos e Mentorias
+              </h3>
+              <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                {myCourses.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Título</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tipo</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Programa</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Vendas</th>
+                          <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Preço</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {myCourses
+                          .sort((a, b) => (b.purchaseCount || 0) - (a.purchaseCount || 0))
+                          .map((course) => {
+                            const relatedProgram = myPrograms.find(p => p.id === course.programId);
+                            return (
+                              <tr 
+                                key={course.id} 
+                                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  setViewingCourse(course);
+                                  setCourseViewModalOpen(true);
+                                }}
+                              >
+                                <td className="px-6 py-4">
+                                  <div className="text-sm font-semibold text-gray-900">{course.title}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${course.type === 'Curso' ? 'bg-rose-100 text-rose-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                    {course.type}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-xs text-gray-600">{relatedProgram?.name || 'N/A'}</div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                    {course.purchaseCount || 0}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  {course.discountPercentage && course.discountPercentage > 0 ? (
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-xs text-gray-400 line-through">${course.price}</span>
+                                      <span className="text-sm font-bold text-rose-600">${Math.round(course.price * (1 - course.discountPercentage / 100))}</span>
                                     </div>
-                                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
-                                        <span className="text-sm font-bold text-yellow-700 mr-1">{feedback.rating}</span>
-                                        <StarIcon className="h-4 w-4 text-yellow-400" />
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                        {allFeedbacks.length === 0 && <li className="px-6 py-8 text-center text-gray-500">Nenhum feedback recebido ainda.</li>}
-                    </ul>
-                </div>
+                                  ) : (
+                                    <span className="text-sm font-bold text-gray-900">${course.price}</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="px-6 py-12 text-center text-gray-500">
+                    <p>Nenhum curso ou mentoria cadastrado ainda.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Recent Feedbacks with Program Context */}
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <span className="w-1 h-8 bg-rose-500 mr-3 rounded"></span>
+                Feedbacks Recentes
+              </h3>
+              <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                {feedbacksWithProgram.length > 0 ? (
+                  <ul className="divide-y divide-gray-100">
+                    {feedbacksWithProgram.slice(0, 8).map(({ feedback, program }) => (
+                      <li key={feedback.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex items-start flex-1">
+                            <img className="h-12 w-12 rounded-full border-2 border-rose-200 shadow-sm flex-shrink-0" src={feedback.avatar} alt={feedback.author} />
+                            <div className="ml-4 flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-base font-semibold text-gray-900">{feedback.author}</p>
+                                <span className="text-xs text-gray-500">•</span>
+                                <span className="text-xs text-gray-500">{feedback.date}</span>
+                              </div>
+                              {program && (
+                                <p className="text-sm text-rose-600 font-medium mt-1">
+                                  {program.name}
+                                </p>
+                              )}
+                              <p className="text-sm text-gray-600 mt-2 line-clamp-2">"{feedback.comment}"</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center bg-gradient-to-r from-yellow-50 to-orange-50 px-4 py-2 rounded-full shadow-sm flex-shrink-0">
+                            <span className="text-base font-bold text-yellow-700 mr-1">{feedback.rating}</span>
+                            <StarIcon className="h-5 w-5 text-yellow-400" />
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="px-6 py-12 text-center text-gray-500">
+                    <p>Nenhum feedback recebido ainda.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -283,38 +501,159 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       {/* Program Modal */}
       {isProgramModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-4">{editingProgram ? 'Editar Programa' : 'Novo Programa'}</h2>
-            <form onSubmit={handleSaveProgram} className="space-y-5">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+            <div className="flex items-center justify-between mb-6 border-b pb-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Nome do Programa</label>
-                <input name="name" defaultValue={editingProgram?.name} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                <h2 className="text-2xl font-bold text-gray-900">{editingProgram ? 'Editar Programa' : 'Novo Programa'}</h2>
+                <p className="text-sm text-gray-500 mt-1">Preencha todos os campos obrigatórios (*)</p>
               </div>
-              <div className="grid grid-cols-2 gap-5">
+              <button onClick={() => setProgramModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleSaveProgram} className="space-y-6">
+              {/* Nome do Programa */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Nome do Programa <span className="text-rose-500">*</span>
+                </label>
+                <input 
+                  name="name" 
+                  defaultValue={editingProgram?.name} 
+                  required 
+                  minLength={3}
+                  maxLength={100}
+                  placeholder="Ex: Intercâmbio Universitário em Lisboa"
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                />
+                <p className="text-xs text-gray-500 mt-1">Mínimo 3 caracteres, máximo 100</p>
+              </div>
+              
+              {/* Localização */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
-                    <input name="destinationCity" defaultValue={editingProgram?.destinationCity} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Cidade de Destino <span className="text-rose-500">*</span>
+                    </label>
+                    <input 
+                      name="destinationCity" 
+                      defaultValue={editingProgram?.destinationCity} 
+                      required 
+                      minLength={2}
+                      placeholder="Ex: Lisboa"
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">País</label>
-                    <input name="destinationCountry" defaultValue={editingProgram?.destinationCountry} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      País de Destino <span className="text-rose-500">*</span>
+                    </label>
+                    <input 
+                      name="destinationCountry" 
+                      defaultValue={editingProgram?.destinationCountry} 
+                      required 
+                      minLength={2}
+                      placeholder="Ex: Portugal"
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                    />
                 </div>
               </div>
+              
+              {/* Preço */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Preço ($)</label>
-                <input name="price" type="number" defaultValue={editingProgram?.price} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Preço (USD) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-gray-500 font-semibold">$</span>
+                  <input 
+                    name="price" 
+                    type="number" 
+                    defaultValue={editingProgram?.price} 
+                    required 
+                    min="1"
+                    max="999999"
+                    step="0.01"
+                    placeholder="0.00"
+                    className="w-full border border-gray-300 rounded-lg shadow-sm p-3 pl-8 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Valor em dólares americanos (USD)</p>
               </div>
+              
+              {/* Descrição Detalhada */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Descrição Detalhada</label>
-                <textarea name="longDescription" defaultValue={editingProgram?.longDescription} required rows={4} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Descrição Detalhada <span className="text-rose-500">*</span>
+                </label>
+                <textarea 
+                  name="longDescription" 
+                  defaultValue={editingProgram?.longDescription} 
+                  required 
+                  minLength={50}
+                  maxLength={1000}
+                  rows={5} 
+                  placeholder="Descreva detalhadamente o programa, incluindo diferenciais, objetivos, público-alvo e benefícios..."
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all resize-none"
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    const counter = target.nextElementSibling as HTMLElement;
+                    if (counter) {
+                      counter.textContent = `${target.value.length}/1000 caracteres`;
+                    }
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {editingProgram?.longDescription ? `${editingProgram.longDescription.length}/1000 caracteres` : '0/1000 caracteres'} • Mínimo 50 caracteres
+                </p>
               </div>
+              
+              {/* Inclusos */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Inclusos (separados por vírgula)</label>
-                <input name="includes" defaultValue={editingProgram?.includes?.join(', ') || ''} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" placeholder="Ex: Acomodação, Voo, Curso..." />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Itens Inclusos
+                </label>
+                <input 
+                  name="includes" 
+                  defaultValue={editingProgram?.includes?.join(', ') || ''} 
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                  placeholder="Ex: Acomodação, Passagem aérea, Curso de idiomas, Seguro viagem, Transfer aeroporto"
+                />
+                <p className="text-xs text-gray-500 mt-1">Separe os itens por vírgula. Deixe em branco se não houver itens inclusos.</p>
               </div>
-              <div className="flex justify-end space-x-3 mt-8 pt-4 border-t">
-                <button type="button" onClick={() => setProgramModalOpen(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-bold shadow-md">Salvar Programa</button>
+              
+              {/* URL da Imagem */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  URL da Imagem do Programa
+                </label>
+                <input 
+                  name="imageUrl" 
+                  type="url"
+                  defaultValue={editingProgram?.image} 
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                />
+                <p className="text-xs text-gray-500 mt-1">URL válida de uma imagem. Se deixar em branco, uma imagem padrão será usada.</p>
+              </div>
+
+              {/* Botões */}
+              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
+                <button 
+                  type="button" 
+                  onClick={() => setProgramModalOpen(false)} 
+                  className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-lg hover:from-rose-600 hover:to-pink-700 font-bold shadow-lg transition-all transform hover:scale-105"
+                >
+                  {editingProgram ? 'Salvar Alterações' : 'Criar Programa'}
+                </button>
               </div>
             </form>
           </div>
@@ -345,6 +684,12 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                 <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
                     <span className="font-semibold text-gray-700">Preço:</span>
                     <span className="font-bold text-rose-600 text-2xl">${viewingProgram.price}</span>
+                </div>
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
+                    <span className="font-semibold text-gray-700">Total de Vendas:</span>
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-base font-bold bg-green-100 text-green-800">
+                      {viewingProgram.purchaseCount || 0}
+                    </span>
                 </div>
 
                 <div>
@@ -392,62 +737,285 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
       {/* Course Modal */}
       {isCourseModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-4">{editingCourse ? 'Editar Curso/Mentoria' : 'Novo Curso/Mentoria'}</h2>
-            <form onSubmit={handleSaveCourse} className="space-y-5">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+            <div className="flex items-center justify-between mb-6 border-b pb-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Título</label>
-                <input name="title" defaultValue={editingCourse?.title} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                <h2 className="text-2xl font-bold text-gray-900">{editingCourse ? 'Editar Curso/Mentoria' : 'Novo Curso/Mentoria'}</h2>
+                <p className="text-sm text-gray-500 mt-1">Preencha todos os campos obrigatórios (*)</p>
               </div>
-              <div className="grid grid-cols-2 gap-5">
+              <button onClick={() => setCourseModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleSaveCourse} className="space-y-6">
+              {/* Título */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Título do Curso/Mentoria <span className="text-rose-500">*</span>
+                </label>
+                <input 
+                  name="title" 
+                  defaultValue={editingCourse?.title} 
+                  required 
+                  minLength={3}
+                  maxLength={100}
+                  placeholder="Ex: Curso de Inglês Avançado para Negócios"
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                />
+              </div>
+              
+              {/* Tipo e Programa */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
-                    <select name="type" defaultValue={editingCourse?.type || 'Curso'} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Tipo <span className="text-rose-500">*</span>
+                    </label>
+                    <select 
+                      name="type" 
+                      defaultValue={editingCourse?.type || 'Curso'} 
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all cursor-pointer"
+                    >
                         <option value="Curso">Curso</option>
                         <option value="Mentoria">Mentoria</option>
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Programa Vinculado</label>
-                    <select name="programId" defaultValue={editingCourse?.programId} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900">
-                        {myPrograms.map(p => (
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Programa Vinculado <span className="text-rose-500">*</span>
+                    </label>
+                    <select 
+                      name="programId" 
+                      defaultValue={editingCourse?.programId} 
+                      required 
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all cursor-pointer"
+                    >
+                        {myPrograms.length === 0 ? (
+                          <option value="" disabled>Nenhum programa disponível</option>
+                        ) : (
+                          myPrograms.map(p => (
                             <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
+                          ))
+                        )}
                     </select>
+                    {myPrograms.length === 0 && (
+                      <p className="text-xs text-amber-600 mt-1">⚠️ Crie um programa antes de adicionar cursos</p>
+                    )}
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-5">
+              {/* Instrutor e Parceiro */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Instrutor</label>
-                    <input name="instructor" defaultValue={editingCourse?.instructor} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Instrutor <span className="text-rose-500">*</span>
+                    </label>
+                    <input 
+                      name="instructor" 
+                      defaultValue={editingCourse?.instructor} 
+                      required 
+                      minLength={2}
+                      placeholder="Ex: Dr. João Silva"
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Parceiro</label>
-                    <input name="partner" defaultValue={editingCourse?.partner} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Instituição Parceira <span className="text-rose-500">*</span>
+                    </label>
+                    <input 
+                      name="partner" 
+                      defaultValue={editingCourse?.partner} 
+                      required 
+                      minLength={2}
+                      placeholder="Ex: Universidade de Lisboa"
+                      className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                    />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
+              {/* Preço e Desconto */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Preço ($)</label>
-                    <input name="price" type="number" defaultValue={editingCourse?.price} required className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Preço (USD) <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-3 text-gray-500 font-semibold">$</span>
+                      <input 
+                        name="price" 
+                        type="number" 
+                        defaultValue={editingCourse?.price} 
+                        required 
+                        min="1"
+                        max="99999"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="w-full border border-gray-300 rounded-lg shadow-sm p-3 pl-8 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                      />
+                    </div>
                  </div>
                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Desconto (%)</label>
-                    <input name="discountPercentage" type="number" min="0" max="100" defaultValue={editingCourse?.discountPercentage} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Desconto Promocional (%)
+                    </label>
+                    <div className="relative">
+                      <input 
+                        name="discountPercentage" 
+                        type="number" 
+                        min="0" 
+                        max="100" 
+                        defaultValue={editingCourse?.discountPercentage || 0}
+                        placeholder="0"
+                        className="w-full border border-gray-300 rounded-lg shadow-sm p-3 pr-8 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all" 
+                      />
+                      <span className="absolute right-3 top-3 text-gray-500 font-semibold">%</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Deixe em 0 para nenhum desconto</p>
                  </div>
               </div>
 
+              {/* Descrição */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Descrição</label>
-                <textarea name="description" defaultValue={editingCourse?.description} required rows={3} className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-gray-900" />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Descrição do Curso <span className="text-rose-500">*</span>
+                </label>
+                <textarea 
+                  name="description" 
+                  defaultValue={editingCourse?.description} 
+                  required 
+                  minLength={20}
+                  maxLength={500}
+                  rows={4} 
+                  placeholder="Descreva o conteúdo, objetivos, carga horária, metodologia e público-alvo do curso..."
+                  className="w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none bg-white text-gray-900 transition-all resize-none"
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    const counter = target.nextElementSibling as HTMLElement;
+                    if (counter) {
+                      counter.textContent = `${target.value.length}/500 caracteres`;
+                    }
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {editingCourse?.description ? `${editingCourse.description.length}/500 caracteres` : '0/500 caracteres'} • Mínimo 20 caracteres
+                </p>
               </div>
-              <div className="flex justify-end space-x-3 mt-8 pt-4 border-t">
-                <button type="button" onClick={() => setCourseModalOpen(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-bold shadow-md">Salvar</button>
+              
+              {/* Botões */}
+              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
+                <button 
+                  type="button" 
+                  onClick={() => setCourseModalOpen(false)} 
+                  className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={myPrograms.length === 0}
+                  className="px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-lg hover:from-rose-600 hover:to-pink-700 font-bold shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {editingCourse ? 'Salvar Alterações' : 'Criar Curso/Mentoria'}
+                </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Program Feedbacks Modal */}
+      {isFeedbacksModalOpen && selectedProgramForFeedbacks && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[3000] backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto custom-scrollbar force-light-scheme">
+            <div className="flex justify-between items-start mb-6 border-b pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedProgramForFeedbacks.name}</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {selectedProgramForFeedbacks.destinationCity}, {selectedProgramForFeedbacks.destinationCountry}
+                </p>
+              </div>
+              <button onClick={() => setFeedbacksModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <span className="sr-only">Fechar</span>
+                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Stats Summary */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-100">
+                <p className="text-xs font-semibold text-gray-600 uppercase">Avaliação Média</p>
+                <div className="flex items-center mt-2">
+                  <span className="text-3xl font-bold text-yellow-700">
+                    {selectedProgramForFeedbacks.feedbacks.length > 0 
+                      ? (selectedProgramForFeedbacks.feedbacks.reduce((acc, f) => acc + f.rating, 0) / selectedProgramForFeedbacks.feedbacks.length).toFixed(1)
+                      : 'N/A'
+                    }
+                  </span>
+                  {selectedProgramForFeedbacks.feedbacks.length > 0 && <StarIcon className="w-6 h-6 text-yellow-400 ml-2" />}
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
+                <p className="text-xs font-semibold text-gray-600 uppercase">Total de Feedbacks</p>
+                <p className="text-3xl font-bold text-blue-700 mt-2">{selectedProgramForFeedbacks.feedbacks.length}</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100">
+                <p className="text-xs font-semibold text-gray-600 uppercase">Total de Vendas</p>
+                <p className="text-3xl font-bold text-green-700 mt-2">
+                  {selectedProgramForFeedbacks.purchaseCount || 0}
+                </p>
+              </div>
+            </div>
+
+            {/* Feedbacks List */}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Todos os Feedbacks</h3>
+              {selectedProgramForFeedbacks.feedbacks.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedProgramForFeedbacks.feedbacks
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((feedback) => (
+                      <div key={feedback.id} className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center">
+                            <img 
+                              src={feedback.avatar} 
+                              alt={feedback.author} 
+                              className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
+                            />
+                            <div className="ml-3">
+                              <p className="font-semibold text-gray-900">{feedback.author}</p>
+                              <p className="text-xs text-gray-500">{feedback.date}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center bg-gradient-to-r from-yellow-100 to-orange-100 px-3 py-1.5 rounded-full border border-yellow-200">
+                            <span className="text-sm font-bold text-yellow-800 mr-1">{feedback.rating}</span>
+                            <StarIcon className="h-4 w-4 text-yellow-600" />
+                          </div>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">"{feedback.comment}"</p>
+                      </div>
+                    ))
+                  }
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">Este programa ainda não recebeu nenhum feedback.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 pt-6 border-t flex justify-end">
+              <button 
+                onClick={() => setFeedbacksModalOpen(false)}
+                className="px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold shadow-sm"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -486,6 +1054,13 @@ export const AgencyDashboardPage: React.FC<AgencyDashboardProps> = ({
                             <span className="font-bold text-rose-600 text-2xl">${viewingCourse.price}</span>
                         )}
                     </div>
+                </div>
+                
+                <div className="flex justify-between text-lg border-b border-gray-100 pb-3">
+                    <span className="font-semibold text-gray-700">Total de Vendas:</span>
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-base font-bold bg-green-100 text-green-800">
+                      {viewingCourse.purchaseCount || 0}
+                    </span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

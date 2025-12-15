@@ -47,6 +47,7 @@ export interface Program {
   feedbacks: Feedback[];
   image: string;
   verifications?: string[];
+  purchaseCount?: number;
   institution?: string;   // nome da instituição (quando program.institution for usado)
   ownerEmail?: string;    // para associar um programa a um usuário mock
   startDate?: string;     // exemplo: '2024-02-01'
@@ -76,6 +77,7 @@ export interface Course {
   programId: number;
   type: 'Curso' | 'Mentoria';
   discountPercentage?: number;
+  purchaseCount?: number;
 }
 
 export interface User {
