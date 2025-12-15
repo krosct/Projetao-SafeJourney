@@ -34,6 +34,26 @@ export interface Program {
   purchaseCount?: number;
 }
 
+export interface Program {
+  id: number;
+  name: string;
+  agency: Agency;
+  destinationCity: string;
+  destinationCountry: string;
+  price: number;
+  shortDescription: string;
+  longDescription: string;
+  includes: string[];
+  feedbacks: Feedback[];
+  image: string;
+  verifications?: string[];
+  purchaseCount?: number;
+  institution?: string;   // nome da instituição (quando program.institution for usado)
+  ownerEmail?: string;    // para associar um programa a um usuário mock
+  startDate?: string;     // exemplo: '2024-02-01'
+  endDate?: string;       // exemplo: '2024-07-31'
+}
+
 export type SafetyStatus = 'Green' | 'Yellow' | 'Red' | 'Neutral';
 
 export interface CitySafetyData {
