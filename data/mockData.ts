@@ -47,7 +47,7 @@ const positiveComments = [
   "Recomendo de olhos fechados! O suporte local foi incrível e as amizades que fiz levarei para a vida.",
   "O programa foi perfeitamente organizado. A acomodação era ótima e as aulas muito enriquecedoras. Uma jornada inesquecível.",
   "A melhor decisão que já tomei! A equipe foi super atenciosa e me ajudou com cada detalhe. Me senti muito empoderada.",
-  "Simplesmente perfeito. O treinamento pré-partida me deixou muito confiante para viajar sozinha."
+  "Simplesmente perfeito. As mentorias e os cursos me deixaram muito confiante para viajar sozinha."
 ];
 const neutralComments = [
   "Foi uma boa experiência no geral. O programa acadêmico era forte, mas a organização de eventos sociais poderia ser melhor.",
@@ -94,7 +94,7 @@ const cities = [
     { city: "Queenstown", country: "Nova Zelândia", coords: { lat: -45.0312, lng: 168.6626 } }
 ];
 
-const includesItems = ["Mensalidades", "Acomodação Verificada", "Atividades Culturais", "Suporte Local 24/7", "Seguro Viagem", "Material do Curso", "Passe de Transporte Público", "Workshop de Segurança", "Sessão de Mentoria", "Kit de Boas-vindas"];
+const includesItems = ["Acomodação Verificada", "Atividades Culturais", "Suporte Local 24/7", "Seguro Viagem", "Material do Curso", "Passe de Transporte Público", "Workshop de Segurança", "Sessão de Mentoria", "Kit de Boas-vindas"];
 
 const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 const getRandomSubset = (arr: any[], n: number) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);

@@ -1,22 +1,38 @@
-
 import React, { useState, useEffect } from 'react';
-import { Program, User } from '../types';
+import { Program, User, Course } from '../types';
 import { CheckmarkIcon } from './icons/CheckmarkIcon';
 import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
 
 interface PurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  program: Program;
+  program?: Program; // Tornou-se opcional
+  course?: Course;   // Novo campo opcional
+  coursePrice?: number; // Preço calculado do curso (com desconto)
+  agencyName?: string; // Nome da agência (necessário para cursos)
   currentUser: User | null;
 }
 
 type Step = 'terms' | 'payment' | 'processing' | 'success';
 
-export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, program, currentUser }) => {
+export const PurchaseModal: React.FC<PurchaseModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  program, 
+  course, 
+  coursePrice,
+  agencyName,
+  currentUser 
+}) => {
   const [step, setStep] = useState<Step>('terms');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   
+  // Define se estamos comprando um curso ou programa
+  const isCourse = !!course;
+  const itemTitle = isCourse ? course?.title : program?.name;
+  const itemPrice = isCourse ? coursePrice : program?.price;
+  const providerName = isCourse ? agencyName : program?.agency.name;
+
   // Payment Form State
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -27,7 +43,6 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
     if (isOpen) {
       setStep('terms');
       setAcceptedTerms(false);
-      // Alteração solicitada: Iniciar vazio ao invés de usar currentUser.name (que era 'Visitante')
       setCardName('');
       setCardNumber('');
       setExpiry('');
@@ -61,27 +76,12 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 z-[3000] flex justify-center items-center p-4 backdrop-blur-sm">
-       {/* CSS Local para forçar scrollbar clara */}
        <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f3f4f6; /* cinza bem claro */
-          border-radius: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #d1d5db; /* cinza médio */
-          border-radius: 6px;
-          border: 2px solid #f3f4f6;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #9ca3af;
-        }
-        /* Forçar esquema de cor clara para controles nativos neste componente */
-        .force-light-scheme {
-          color-scheme: light;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 6px; border: 2px solid #f3f4f6; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
+        .force-light-scheme { color-scheme: light; }
       `}</style>
 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] force-light-scheme">
@@ -89,7 +89,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
         {/* Header */}
         <div className="bg-rose-50 p-4 border-b border-rose-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-800">
-            {step === 'terms' && 'Termos do Programa'}
+            {step === 'terms' && (isCourse ? 'Termos do Curso' : 'Termos do Programa')}
             {step === 'payment' && 'Pagamento Seguro'}
             {step === 'processing' && 'Processando...'}
             {step === 'success' && 'Compra Confirmada'}
@@ -108,17 +108,37 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
           {step === 'terms' && (
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-lg border border-gray-200 text-sm text-gray-600 h-64 overflow-y-auto custom-scrollbar shadow-inner">
-                <h3 className="font-bold text-gray-800 mb-2">1. Condições Gerais de Segurança</h3>
-                <p className="mb-2">A agência <strong>{program.agency.name}</strong> compromete-se a fornecer acomodação verificada (female-only) e suporte local 24/7 conforme descrito no pacote.</p>
-                
-                <h3 className="font-bold text-gray-800 mb-2">2. Política de Cancelamento e Reembolso</h3>
-                <p className="mb-2">Cancelamentos feitos até 30 dias antes do embarque terão reembolso de 80%. Cancelamentos com menos de 30 dias estão sujeitos a multas contratuais.</p>
-                
-                <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Women Go Safe</h3>
-                <p className="mb-2">Ao participar deste programa, a intercambista concorda em respeitar as leis locais e manter uma conduta que promova a segurança e o bem-estar coletivo.</p>
-                
-                <h3 className="font-bold text-gray-800 mb-2">4. Responsabilidades</h3>
-                <p>A plataforma atua como intermediadora. A execução dos serviços é de responsabilidade integral da agência contratada.</p>
+                {isCourse ? (
+                  // TERMOS ESPECÍFICOS PARA CURSO
+                  <>
+                    <h3 className="font-bold text-gray-800 mb-2">1. Acesso ao Conteúdo</h3>
+                    <p className="mb-2">O curso <strong>{itemTitle}</strong> será disponibilizado imediatamente após a confirmação do pagamento no Hub de Conhecimento.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">2. Certificação</h3>
+                    <p className="mb-2">Após a conclusão de todas as aulas e atividades, um certificado digital será emitido em nome da aluna.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">3. Propriedade Intelectual</h3>
+                    <p className="mb-2">O material didático é de uso pessoal e intransferível, sendo proibida sua reprodução ou compartilhamento sem autorização.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">4. Garantia</h3>
+                    <p>Oferecemos garantia de satisfação de 7 dias. Caso o conteúdo não atenda às expectativas, o reembolso integral pode ser solicitado neste período.</p>
+                  </>
+                ) : (
+                  // TERMOS ORIGINAIS DO PROGRAMA
+                  <>
+                    <h3 className="font-bold text-gray-800 mb-2">1. Condições Gerais de Segurança</h3>
+                    <p className="mb-2">A agência <strong>{providerName}</strong> compromete-se a fornecer acomodação verificada (female-only) e suporte local 24/7 conforme descrito no pacote.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">2. Política de Cancelamento e Reembolso</h3>
+                    <p className="mb-2">Cancelamentos feitos até 30 dias antes do embarque terão reembolso de 80%. Cancelamentos com menos de 30 dias estão sujeitos a multas contratuais.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">3. Código de Conduta Women Go Safe</h3>
+                    <p className="mb-2">Ao participar deste programa, a intercambista concorda em respeitar as leis locais e manter uma conduta que promova a segurança e o bem-estar coletivo.</p>
+                    
+                    <h3 className="font-bold text-gray-800 mb-2">4. Responsabilidades</h3>
+                    <p>A plataforma atua como intermediadora. A execução dos serviços é de responsabilidade integral da agência contratada.</p>
+                  </>
+                )}
               </div>
 
               <div className="flex items-start">
@@ -133,7 +153,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-gray-700 cursor-pointer">
-                    Li e concordo com os termos e condições do programa.
+                    Li e concordo com os termos e condições do {isCourse ? 'curso' : 'programa'}.
                   </label>
                 </div>
               </div>
@@ -156,7 +176,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
               <div className="bg-rose-50 p-4 rounded-lg flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">Total a pagar</p>
-                  <p className="text-2xl font-bold text-gray-800">${program.price}</p>
+                  <p className="text-2xl font-bold text-gray-800">${itemPrice}</p>
                 </div>
                 <ShieldCheckIcon className="w-8 h-8 text-rose-400" />
               </div>
@@ -222,7 +242,7 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                 type="submit"
                 className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 shadow-md transition-transform transform active:scale-95"
               >
-                Pagar ${program.price}
+                Pagar ${itemPrice}
               </button>
             </form>
           )}
@@ -243,14 +263,23 @@ export const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
               </div>
               <h2 className="text-3xl font-extrabold text-gray-800 mb-2">Compra Realizada!</h2>
               <p className="text-gray-600 mb-6">
-                Parabéns! Sua vaga no programa <strong>{program.name}</strong> está garantida.
+                {isCourse 
+                  ? <>Você agora tem acesso ilimitado ao curso <strong>{itemTitle}</strong>.</>
+                  : <>Parabéns! Sua vaga no programa <strong>{itemTitle}</strong> está garantida.</>
+                }
               </p>
               <div className="bg-gray-50 p-4 rounded-lg mb-6 text-sm text-left border border-gray-100">
                 <p className="mb-2"><strong>Próximos passos:</strong></p>
                 <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                  <li>Enviamos um e-mail com o comprovante e contrato.</li>
-                  <li>A agência entrará em contato em até 24h úteis.</li>
-                  <li>Acesse o "Hub de Conhecimento" para iniciar seus cursos bônus.</li>
+                  <li>Enviamos um e-mail com o comprovante.</li>
+                  {isCourse ? (
+                     <li>Acesse o "Hub de Conhecimento" para iniciar suas aulas agora mesmo.</li>
+                  ) : (
+                    <>
+                      <li>A agência entrará em contato em até 24h úteis.</li>
+                      <li>Acesse o "Hub de Conhecimento" para iniciar seus cursos bônus.</li>
+                    </>
+                  )}
                 </ul>
               </div>
               <button
